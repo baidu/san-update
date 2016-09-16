@@ -6,7 +6,7 @@ module.exports = {
     basePath: '../',
 
     // frameworks to use
-    frameworks: ['jasmine2.3.4', 'esl'],
+    frameworks: ['jasmine2.3.4', 'esl', './test/babel-support.js'],
 
 
     // list of files / patterns to load in the browser

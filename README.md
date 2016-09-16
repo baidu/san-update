@@ -195,3 +195,4 @@ open doc/api/index.html
 
 - 从[diffy-update](https://github.com/ecomfe/diffy-update)迁移代码
 - 移除`withDiff`及其相关功能
+- 构建入口模块

@@ -1,5 +1,5 @@
 /**
- * EMC (EFE Model & Collection)
+ * san-update
  * Copyright 2016 Baidu Inc. All rights reserved.
  *
  * @file update helper module
