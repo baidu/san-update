@@ -1,0 +1,16 @@
+{
+    "files": [
+        "src/**"
+    ],
+    "eslint": {
+        "env": {
+            "es6": true
+        },
+        "rules": {
+            "fecs-use-for-of": false,
+            "fecs-valid-map-set": false,
+            "no-console": false,
+            "fecs-prefer-spread-element": false
+        }
+    }
+}
