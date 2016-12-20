@@ -12,11 +12,11 @@ let clone = target => {
     }
 
     let result = {};
+    /* eslint-disable guard-for-in */
     for (let key in target) {
-        if (target.hasOwnProperty(key)) {
-            result[key] = target[key];
-        }
+        result[key] = target[key];
     }
+    /* eslint-enable guard-for-in */
 
     return result;
 };

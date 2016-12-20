@@ -26,7 +26,15 @@ describe('update method', () => {
         expect(result).toEqual(source);
     });
 
-    it('shoud update array by index', () => {
+    it('should include prototype properties', () => {
+        let prototype = {x: 1};
+        let source = Object.create(prototype);
+        source.y = 2;
+        let result = update(source, {y: {$set: 3}});
+        expect(result).toEqual({x: 1, y: 3});
+    })
+
+    it('should update array by index', () => {
         let source = createSourceObject();
         let result = update(source, {foo: {2: {$set: 4}}});
         expect(result.foo[2]).toBe(4);
@@ -35,7 +43,7 @@ describe('update method', () => {
         expect(result).toEqual(source);
     });
 
-    it('shoud update a nested property value', () => {
+    it('should update a nested property value', () => {
         let source = createSourceObject();
         let result = update(source, {tom: {jack: {$set: 2}}});
         expect(result.tom.jack).toBe(2);
