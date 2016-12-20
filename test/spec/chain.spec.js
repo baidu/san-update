@@ -26,6 +26,7 @@ describe('chain method', () => {
         expect(typeof updateable.splice).toBe('function');
         expect(typeof updateable.defaults).toBe('function');
         expect(typeof updateable.invoke).toBe('function');
+        expect(typeof updateable.omit).toBe('function');
     });
 
     it('should correctly update object', () => {

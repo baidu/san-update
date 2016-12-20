@@ -10,7 +10,7 @@ import update, {merge} from './update';
 
 const EMPTY_COMMANDS = {};
 
-let methods = ['set', 'push', 'unshift', 'splice', 'merge', 'defaults', 'invoke'];
+let methods = ['set', 'push', 'unshift', 'splice', 'merge', 'defaults', 'invoke', 'omit'];
 let createUpdater = (value, commands) => {
     let updater = methods.reduce(
         (updater, shortcut) => {

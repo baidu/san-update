@@ -6,6 +6,9 @@
  * @author otakustay
  */
 
+// 当指令返回这个对象的时候，说明要把这个属性移除
+const OMIT_THIS_PROPERTY = {};
+
 let clone = target => {
     if (Array.isArray(target)) {
         return target.slice();
@@ -98,6 +101,16 @@ const AVAILABLE_COMMANDS = {
 
     $invoke(container, propertyName, factory) {
         return factory(container[propertyName]);
+    },
+
+    $omit(container, propertyName, assert) {
+        let value = container[propertyName];
+
+        if (assert === true || (typeof assert === 'function' && assert(value))) {
+            return OMIT_THIS_PROPERTY;
+        }
+
+        return value;
     }
 };
 
@@ -114,6 +127,7 @@ const AVAILABLE_COMMAND_KEYS = Object.keys(AVAILABLE_COMMANDS);
  * - `$merge`：将2个对象进行浅合并（不递归）
  * - `$defaults`：将指定对象的属性值填到原属性为`undefined`的属性上
  * - `$invoke`：用一个工厂函数的返回值作为`$set`指令的输入，工厂函数接受属性的旧值作为唯一的参数
+ * - `$omit`：用于移除某个属性，传递`boolean`值来确认是否移除（`true`为移除），也可传递一个函数（参数为旧值）用其返回值确认是否移除
  *
  * 可以在一次更新操作中对不同的属性用不同的指令：
  *
@@ -143,24 +157,69 @@ let update = (source, commands) => {
         return AVAILABLE_COMMANDS[possibleRootCommand](wrapper, 'source', commandValue);
     }
 
-    let result = clone(source);
-    for (let key in commands) {
-        if (!commands.hasOwnProperty(key)) {
-            continue;
-        }
-
+    let executeCommand = key => {
         let propertyCommand = commands[key];
         let availableCommand = find(AVAILABLE_COMMAND_KEYS, key => propertyCommand.hasOwnProperty(key));
 
         // 找到指令节点后，对当前属性进行更新，
         // 如果这个节点不代表指令，那么肯定它的某个属性（或子属性）是指令，继续递归往下找
         let newValue = availableCommand
-            ? AVAILABLE_COMMANDS[availableCommand](result, key, propertyCommand[availableCommand])
-            : update(result[key] || {}, propertyCommand);
-        result[key] = newValue;
+            ? AVAILABLE_COMMANDS[availableCommand](source, key, propertyCommand[availableCommand])
+            : update(source[key] || {}, propertyCommand);
+
+        return newValue;
+    };
+
+    // 因为可能通过指令增加一些原本没有的属性，所以最后还要对`commands`做一次遍历来确保没有漏掉
+    let patchNewProperties = result => {
+        for (let key in commands) {
+            if (result.hasOwnProperty(key) || !commands.hasOwnProperty(key)) {
+                continue;
+            }
+
+            let newValue = executeCommand(key);
+
+            if (newValue !== OMIT_THIS_PROPERTY) {
+                result[key] = newValue;
+            }
+        }
+
+        return result;
+    };
+
+    if (Array.isArray(source)) {
+        let result = [];
+        for (let i = 0; i < source.length; i++) {
+            // 没有对应的指令，自然是不更新的，直接复制过去
+            if (!commands.hasOwnProperty(i)) {
+                result.push(source[i]);
+                continue;
+            }
+
+            let newValue = executeCommand(i);
+            if (newValue !== OMIT_THIS_PROPERTY) {
+                result.push(newValue);
+            }
+        }
+
+        return patchNewProperties(result);
     }
 
-    return result;
+    let result = {};
+    for (let key in source) {
+        // 没有对应的指令，自然是不更新的，直接复制过去
+        if (!commands.hasOwnProperty(key)) {
+            result[key] = source[key];
+            continue;
+        }
+
+        let newValue = executeCommand(key);
+        if (newValue !== OMIT_THIS_PROPERTY) {
+            result[key] = newValue;
+        }
+    }
+
+    return patchNewProperties(result);
 };
 
 export default update;
@@ -264,3 +323,14 @@ export let defaults = (source, path, value) => update(source, buildPathObject(pa
  * @return {Object} 更新后的新对象
  */
 export let invoke = (source, path, factory) => update(source, buildPathObject(path, {$invoke: factory}));
+
+/**
+ * 针对`$omit`指令的快捷函数，其中`assert`参数默认值为`true`
+ *
+ * @param {Object} source 待更新的对象
+ * @param {string?|Array.<string>|number?|Array.<number>} path 属性的路径，如果更新二层以上的属性则需要提供一个字符串数组，
+ *     如果该参数为`undefined`或`null`，则会直接对`source`对象进行更新操作
+ * @param {boolean|Function} assert 用于确认是否要移除属性的判断条件或函数
+ * @return {Object} 更新后的新对象
+ */
+export let omit = (source, path, assert = true) => update(source, buildPathObject(path, {$omit: assert}));

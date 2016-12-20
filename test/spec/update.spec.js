@@ -1,4 +1,4 @@
-import update, {set, push, unshift, splice, merge, defaults, invoke} from 'update';
+import update, {set, push, unshift, splice, merge, defaults, invoke, omit} from 'update';
 
 function createSourceObject() {
     return {
@@ -117,6 +117,46 @@ describe('update method', () => {
         expect(source).toEqual(createSourceObject());
     });
 
+    it('should recognize omit command', () => {
+        let source = createSourceObject();
+        let result = update(source, {tom: {jack: {$omit: true}}});
+        expect(result.tom.hasOwnProperty('jack')).toBe(false);
+        expect(source).toEqual(createSourceObject());
+    });
+
+    it('should accept assert boolean in omit command', () => {
+        let source = createSourceObject();
+        let result = update(source, {tom: {jack: {$omit: false}}});
+        expect(result).toEqual(source);
+        expect(source).toEqual(createSourceObject());
+    });
+
+    it('should accept assert function in omit command', () => {
+        let source = createSourceObject();
+        let result = update(
+            source,
+            {
+                tom: {
+                    jack: {
+                        $omit() {
+                            return true;
+                        }
+                    }
+                },
+                x: {
+                    y: {
+                        $omit() {
+                            return false;
+                        }
+                    }
+                }
+            }
+        );
+        expect(result.tom.hasOwnProperty('jack')).toBe(false);
+        expect(result.x.y).toBe(source.x.y);
+        expect(source).toEqual(createSourceObject());
+    });
+
     it('should expose set function', () => {
         let source = createSourceObject();
         let result = set(source, ['tom', 'jack'], 2);
@@ -183,6 +223,13 @@ describe('update method', () => {
         let source = createSourceObject();
         let result = invoke(source, ['tom', 'jack'], x => x * 2);
         expect(result.tom.jack).toBe(2);
+        expect(source).toEqual(createSourceObject());
+    });
+
+    it('should expose omit function', () => {
+        let source = createSourceObject();
+        let result = omit(source, ['tom', 'jack'], () => true);
+        expect(result.tom.hasOwnProperty('jack')).toBe(false);
         expect(source).toEqual(createSourceObject());
     });
 
