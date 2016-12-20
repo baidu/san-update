@@ -60,7 +60,7 @@ newObject.foo.bar = 1;
 使用编译后的默认模块可以提供对象更新的功能：
 
 ```javascript
-import update from 'san-update';
+import {update} from 'san-update';
 
 let source = {
     name: {
@@ -85,10 +85,10 @@ console.log(target);
 
 ### 链式调用
 
-`chain`模块提供了链式更新一个对象的方法，使用方法如下：
+`chain`模块提供了链式更新一个对象的方法，可以使用`chain`或者`immutable`来引入这一函数，使用方法如下：
 
 ```javascript
-import chain from 'update/chain';
+import {immutable} from 'san-update';
 
 let source = {
     name: {
@@ -98,7 +98,7 @@ let source = {
     age: 20,
     children: ['Alice', 'Bob']
 };
-let target = chain(source)
+let target = immutable(source)
     .set(['name', 'firstName'], 'Petty')
     .set('age', 21)
     .push('children', 'Cary')
@@ -115,10 +115,10 @@ console.log(target);
 // }
 ```
 
-`chain`后的对象每次调用对应的更新方法（如`set`、`push`等），都会得到一个新的对象，原有的对象不会受影响，比如：
+链式调用后的对象每次调用对应的更新方法（如`set`、`push`等），都会得到一个新的对象，原有的对象不会受影响，比如：
 
 ```javascript
-import chain from 'update/chain';
+import {immutable} from 'san-update';
 
 let source = {
     name: {
@@ -128,12 +128,12 @@ let source = {
     age: 20,
     children: ['Alice', 'Bob']
 };
-let updateable = chain(source);
+let updateable = immutable(source);
 
 let nameUpdated = updateable.set(['name', 'firstName'], 'Petty');
 let ageUpdated = nameUpdated.set('age', 21);
 
-console.log(nameUpdated);
+console.log(nameUpdated.value());
 // 注意age并没有受影响
 //
 // {
@@ -149,7 +149,7 @@ console.log(nameUpdated);
 `chain`是延迟执行的，所以假设已经对`foo`进行了操作，再对着`foo.bar`（或更深层级的属性）进行操作，会出现不可预期的行为，如以下代码：
 
 ```javascript
-import chain from 'update/chain';
+import {immutable} from 'san-update';
 
 let source = {
     name: {
@@ -160,9 +160,10 @@ let source = {
     children: ['Alice', 'Bob']
 };
 
-let target = chain(source)
+let target = immutable(source)
     .set('ownedCar', {brand: 'Benz'})
-    .merge('ownedCar', {type: 'C Class'});
+    .merge('ownedCar', {type: 'C Class'})
+    .value();
 // 注意ownedCar.type并没有生效
 //
 // {

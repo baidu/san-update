@@ -118,7 +118,7 @@ const AVAILABLE_COMMAND_KEYS = Object.keys(AVAILABLE_COMMANDS);
  * 可以在一次更新操作中对不同的属性用不同的指令：
  *
  * ```javascript
- * import update from 'diffy-update';
+ * import {update} from 'san-update';
  *
  * let newObject = withDiff(
  *     source,

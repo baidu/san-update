@@ -9,5 +9,9 @@
 import update from './update';
 import chain from './chain';
 
-export {update, chain};
+export {
+    update as update,
+    chain as chain,
+    chain as immutable
+};
 export {set, push, unshift, splice, merge, defaults, invoke} from './update';

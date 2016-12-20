@@ -37,7 +37,7 @@ let createUpdater = (value, commands) => {
 /**
  * 包装一个对象为可链式调用更新的对象
  *
- * 包装后的对象带有所有更新快捷方式，同时使用`value()`可获取更新后的值，`withDiff()`可同时获取更新后的值和差异对象
+ * 包装后的对象带有所有更新快捷方式，同时使用`value()`可获取更新后的值
  *
  * @param {Object} source 包装的对象
  * @return {Object} 可执行所有用于更新的命令
