@@ -51,7 +51,7 @@ newObject.foo.bar = 1;
 
 ### 前置环境
 
-`san-update`完全由ES2015+编写，如果环境无法满足要求，则在使用前需要添加对应的`polyfill`或`shim`，并使用[babel](http://babeljs.io)进行编译，全局至少要包含`Object.entries`函数的实现
+`san-update`完全由ES2015+编写，如果环境无法满足要求，则在使用前需要添加对应的`polyfill`或`shim`，并使用[babel](http://babeljs.io)进行编译。
 
 针对`babel`至少需要[es2015 preset](http://babeljs.io/docs/plugins/preset-es2015/)
 
@@ -73,7 +73,7 @@ let target = update(source, {name: {firstName: {$set: 'Petty'}}});
 console.log(target);
 // {
 //     name: {
-//         firstName: 'Pretty',
+//         firstName: 'Petty',
 //         lastName: 'Wong'
 //     }
 // }
@@ -107,11 +107,11 @@ let target = immutable(source)
 console.log(target);
 // {
 //     name: {
-//         firstName: 'Pretty',
+//         firstName: 'Petty',
 //         lastName: 'Wong'
 //     },
 //     age: 21,
-//     children: ['Alice', 'Bob', 'Petty']
+//     children: ['Alice', 'Bob', 'Cary']
 // }
 ```
 
@@ -138,11 +138,11 @@ console.log(nameUpdated.value());
 //
 // {
 //     name: {
-//         firstName: 'Pretty',
+//         firstName: 'Petty',
 //         lastName: 'Wong'
 //     },
 //     age: 20,
-//     children: ['Alice', 'Bob', 'Petty']
+//     children: ['Alice', 'Bob']
 // }
 ```
 
@@ -168,11 +168,11 @@ let target = immutable(source)
 //
 // {
 //     name: {
-//         firstName: 'Pretty',
+//         firstName: 'Navy',
 //         lastName: 'Wong'
 //     },
 //     age: 20,
-//     children: ['Alice', 'Bob', 'Petty'],
+//     children: ['Alice', 'Bob'],
 //     ownedCar: {
 //         brand: 'Benz'
 //     }
