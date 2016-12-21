@@ -203,3 +203,7 @@ open doc/api/index.html
 - 添加`immutable`作为`chain`的别名
 - 修复内部`clone`函数不会复制原型属性的错误
 - 添加了`omit`指令
+
+### 1.1.1
+
+- 修复`omit`快捷函数未导出的BUG
