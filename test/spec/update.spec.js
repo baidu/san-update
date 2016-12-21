@@ -1,4 +1,4 @@
-import update, {set, push, unshift, splice, merge, defaults, invoke, omit} from 'update';
+import {update, set, push, unshift, splice, merge, defaults, invoke, omit} from 'index';
 
 function createSourceObject() {
     return {

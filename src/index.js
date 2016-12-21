@@ -14,4 +14,4 @@ export {
     chain as chain,
     chain as immutable
 };
-export {set, push, unshift, splice, merge, defaults, invoke} from './update';
+export {set, push, unshift, splice, merge, defaults, invoke, omit} from './update';

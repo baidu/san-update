@@ -1,4 +1,4 @@
-import chain from 'chain';
+import {immutable} from 'index';
 
 function createSourceObject() {
     return {
@@ -18,7 +18,7 @@ function createSourceObject() {
 
 describe('chain method', () => {
     it('should export all update shortcuts', () => {
-        let updateable = chain({});
+        let updateable = immutable({});
         expect(typeof updateable.set).toBe('function');
         expect(typeof updateable.merge).toBe('function');
         expect(typeof updateable.push).toBe('function');
@@ -30,7 +30,7 @@ describe('chain method', () => {
     });
 
     it('should correctly update object', () => {
-        let target = chain(createSourceObject())
+        let target = immutable(createSourceObject())
             .set(['x', 'y', 'z'], 3)
             .push('foo', 4)
             .merge('tom', {tinna: 2})
@@ -47,7 +47,7 @@ describe('chain method', () => {
 
     it('should fork an object for each method invocation', () => {
         let source = createSourceObject();
-        let a = chain(source).set('foo', 4);
+        let a = immutable(source).set('foo', 4);
         a.set('bob', 3);
         expect(a.value().bob).toBe(2);
     });
