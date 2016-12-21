@@ -53,7 +53,7 @@ newObject.foo.bar = 1;
 
 `san-update`完全由ES2015+编写，如果环境无法满足要求，则在使用前需要添加对应的`polyfill`或`shim`，并使用[babel](http://babeljs.io)进行编译，全局至少要包含`Object.entries`函数的实现
 
-针对`babel`除[es2015 preset](http://babeljs.io/docs/plugins/preset-es2015/)外，至少需要[function bind](http://babeljs.io/docs/plugins/transform-function-bind/)插件得以正常工作
+针对`babel`至少需要[es2015 preset](http://babeljs.io/docs/plugins/preset-es2015/)
 
 ### 基本场景
 
@@ -197,3 +197,9 @@ open doc/api/index.html
 - 从[diffy-update](https://github.com/ecomfe/diffy-update)迁移代码
 - 移除`withDiff`及其相关功能
 - 构建入口模块
+
+### 1.1.0
+
+- 添加`immutable`作为`chain`的别名
+- 修复内部`clone`函数不会复制原型属性的错误
+- 添加了`omit`指令

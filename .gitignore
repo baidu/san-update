@@ -6,3 +6,4 @@ npm-debug.log
 /*.js
 !gulpfile.js
 map
+.DS_Store
