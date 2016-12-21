@@ -7,3 +7,4 @@ esdoc.json
 module.conf
 edp-webserver-config.js
 gulpfile.js
+yarn.lock
