@@ -294,3 +294,7 @@ open doc/api/index.html
 ### 1.1.1
 
 - 修复`omit`快捷函数未导出的BUG
+
+### 1.2.0
+
+- 添加`macro`功能用于构建更新函数。
