@@ -8,10 +8,12 @@
 
 import update from './update';
 import chain from './chain';
+import macro from './macro';
 
 export {
     update as update,
     chain as chain,
     chain as immutable
 };
+export {macro};
 export {set, push, unshift, splice, merge, defaults, invoke, omit} from './update';

@@ -6,13 +6,12 @@
  * @author otakustay
  */
 
-import update, {merge} from './update';
+import update, {merge, availableCommandNames} from './update';
 
 const EMPTY_COMMANDS = {};
 
-let methods = ['set', 'push', 'unshift', 'splice', 'merge', 'defaults', 'invoke', 'omit'];
 let createUpdater = (value, commands) => {
-    let updater = methods.reduce(
+    let updater = availableCommandNames.reduce(
         (updater, shortcut) => {
             updater[shortcut] = (path, ...args) => {
                 let additionCommand = {['$' + shortcut]: args.length === 1 ? args[0] : args};

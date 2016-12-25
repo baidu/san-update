@@ -116,6 +116,8 @@ const AVAILABLE_COMMANDS = {
 
 const AVAILABLE_COMMAND_KEYS = Object.keys(AVAILABLE_COMMANDS);
 
+export let availableCommandNames = AVAILABLE_COMMAND_KEYS.map(key => key.slice(1));
+
 /**
  * 根据提供的指令更新一个对象，返回更新后的新对象，原对象不会作任何的修改
  *

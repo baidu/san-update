@@ -181,6 +181,93 @@ let target = immutable(source)
 
 这并不会给你预期的结果，所以在使用链式调用的时候要注意每个指令的路径。
 
+### 使用macro构建更新函数
+
+当一个更新指令会被经常使用时，我们常用的方式是将这个指令保存为一个常量，以避免每一次构建指令的消耗。但是任何对象更新库的指令都是一个不容易理解的底层数据结构，因此为了更方便直观地构建一个可被反复使用的更新对象的函数，`san-update`提供`macro`功能来声明更新的函数。
+
+`macro`的使用方式和链式调用相似，区别在于构造时不需要传入待更新的对象，而其最终返回的函数则是一个接收待更新对象的函数。
+
+```javascript
+import {macro} from 'san-update';
+
+// 构建一个用于升级当前角色的函数
+let levelUp = macro()
+    .invoke('level', level => level + 1)
+    .invoke('hp', hp => Math.round(hp * 1.19)) // 增加19%的HP
+    .invoke('str', str => str + 2)) // 增加2点力量
+    .invoke('int', int => int + 1)) // 增加1点智力
+    .invoke('agi', agi => agi + 5)) // 增加5点敏捷
+    .invoke(['bag', 'capacity'], capacity => capacity + 2) // 背包增加2格空间
+    .set('debuff', []) // 清除所有负面状态
+    .build(); // 最终生成更新的函数
+
+let hero = game.getMyHero();
+console.log(hero);
+// {
+//     level: 1
+//     hp: 100,
+//     str: 4,
+//     int: 2,
+//     agi: 5,
+//     bag: {
+//         items: [],
+//         capacity: 12
+//     },
+//     debuff: []
+// }
+
+hero = levelUp(hero);
+console.log(hero);
+// {
+//     level: 2
+//     hp: 119,
+//     str: 6,
+//     int: 3,
+//     agi: 10,
+//     bag: {
+//         items: [],
+//         capacity: 14
+//     },
+//     debuff: []
+// }
+
+hero = levelUp(hero);
+console.log(hero);
+// {
+//     level: 3
+//     hp: 142,
+//     str: 8,
+//     int: 4,
+//     agi: 15,
+//     bag: {
+//         items: [],
+//         capacity: 16
+//     },
+//     debuff: []
+// }
+```
+
+当然，如果从最初就有已经构造完成的更新指令，则可以在调用`macro()`方法时作为参数传递，上面的`levelUp`函数相当于：
+
+```javascript
+import {macro} from 'san-update';
+
+let command = {
+    level: {$invoke(level) { return level + 1; }},
+    hp: {$invoke(hp) { return Math.round(hp * 1.19); }},
+    str: {$invoke(str) { return str + 2; }},
+    int: {$invoke(int) { return int + 1; }},
+    agi: {$invoke(agi) { return agi + 5; }},
+    bag: {
+        capacity: {$invoke(capacity) { return capacity + 2; }}
+    },
+    debuff: {$set: []}
+};
+let levelUp = macro(command);
+```
+
+与链式调用相同，`macro`的每一个操作都会生成一个全新的对象，原有的对象不会受到影响。
+
 ## API文档
 
 
