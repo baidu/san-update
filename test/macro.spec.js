@@ -1,4 +1,6 @@
-import {macro} from 'index';
+import {expect} from 'chai';
+import deepEqual from 'deep-eql';
+import {macro} from '../src/index';
 
 function createSourceObject() {
     return {
@@ -19,14 +21,14 @@ function createSourceObject() {
 describe('macro method', () => {
     it('should export all update shortcuts', () => {
         let builder = macro();
-        expect(typeof builder.set).toBe('function');
-        expect(typeof builder.merge).toBe('function');
-        expect(typeof builder.push).toBe('function');
-        expect(typeof builder.unshift).toBe('function');
-        expect(typeof builder.splice).toBe('function');
-        expect(typeof builder.defaults).toBe('function');
-        expect(typeof builder.invoke).toBe('function');
-        expect(typeof builder.omit).toBe('function');
+        expect(typeof builder.set).to.equal('function');
+        expect(typeof builder.merge).to.equal('function');
+        expect(typeof builder.push).to.equal('function');
+        expect(typeof builder.unshift).to.equal('function');
+        expect(typeof builder.splice).to.equal('function');
+        expect(typeof builder.defaults).to.equal('function');
+        expect(typeof builder.invoke).to.equal('function');
+        expect(typeof builder.omit).to.equal('function');
     });
 
     it('should correctly build an update function', () => {
@@ -37,13 +39,17 @@ describe('macro method', () => {
             .invoke('bob', i => i + 1)
             .build();
         let target = update(createSourceObject());
-        expect(target).toEqual({
-            x: {y: {z: 3}},
-            foo: [1, 2, 3, 4],
-            alice: 1,
-            bob: 3,
-            tom: {jack: 1, tinna: 2}
-        });
+        let isEqual = deepEqual(
+            target,
+            {
+                x: {y: {z: 3}},
+                foo: [1, 2, 3, 4],
+                alice: 1,
+                bob: 3,
+                tom: {jack: 1, tinna: 2}
+            }
+        );
+        expect(isEqual).to.equal(true);
     });
 
     it('should fork an object for each method invocation', () => {
@@ -51,7 +57,7 @@ describe('macro method', () => {
         let updateFooAndBob = updateFoo.set('bob', 3);
         let source = createSourceObject();
         let target = updateFoo.build()(source);
-        expect(target.bob).toBe(2);
+        expect(target.bob).to.equal(2);
     });
 
     it('should accept an initial command', () => {
@@ -60,12 +66,16 @@ describe('macro method', () => {
             .invoke('bob', i => i + 1)
             .build();
         let target = update(createSourceObject());
-        expect(target).toEqual({
-            x: {y: {z: 3}},
-            foo: [1, 2, 3, 4],
-            alice: 1,
-            bob: 3,
-            tom: {jack: 1, tinna: 2}
-        });
+        let isEqual = deepEqual(
+            target,
+            {
+                x: {y: {z: 3}},
+                foo: [1, 2, 3, 4],
+                alice: 1,
+                bob: 3,
+                tom: {jack: 1, tinna: 2}
+            }
+        );
+        expect(isEqual).to.equal(true);
     });
 });

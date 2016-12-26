@@ -1,3 +1,16 @@
 {
-    "presets": ["es2015-rollup"]
+    "env": {
+        "development": {
+            "presets": ["es2015-rollup"]
+        },
+        "production": {
+            "presets": ["es2015-rollup"]
+        },
+        "test": {
+            "presets": ["es2015"],
+            "plugins": [
+                "istanbul"
+            ]
+        }
+    }
 }

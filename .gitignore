@@ -7,3 +7,5 @@ npm-debug.log
 !gulpfile.js
 map
 .DS_Store
+coverage
+.nyc_output

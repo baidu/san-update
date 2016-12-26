@@ -1,4 +1,6 @@
-import {update, set, push, unshift, splice, merge, defaults, invoke, omit} from 'index';
+import {expect} from 'chai';
+import deepEqual from 'deep-eql';
+import {update, set, push, unshift, splice, merge, defaults, invoke, omit} from '../src/index';
 
 function createSourceObject() {
     return {
@@ -20,10 +22,10 @@ describe('update method', () => {
     it('should update a single property value', () => {
         let source = createSourceObject();
         let result = update(source, {alice: {$set: 2}});
-        expect(result.alice).toBe(2);
-        expect(source).toEqual(createSourceObject());
+        expect(result.alice).to.equal(2);
+        expect(deepEqual(source, createSourceObject())).to.equal(true);
         result.alice = 1;
-        expect(result).toEqual(source);
+        expect(deepEqual(source, result)).to.equal(true);
     });
 
     it('should include prototype properties', () => {
@@ -31,104 +33,104 @@ describe('update method', () => {
         let source = Object.create(prototype);
         source.y = 2;
         let result = update(source, {y: {$set: 3}});
-        expect(result).toEqual({x: 1, y: 3});
+        expect(deepEqual(result, {x: 1, y: 3})).to.equal(true);
     })
 
     it('should update array by index', () => {
         let source = createSourceObject();
         let result = update(source, {foo: {2: {$set: 4}}});
-        expect(result.foo[2]).toBe(4);
-        expect(source).toEqual(createSourceObject());
+        expect(result.foo[2]).to.equal(4);
+        expect(deepEqual(source, createSourceObject())).to.equal(true);
         result.foo[2] = 3;
-        expect(result).toEqual(source);
+        expect(deepEqual(source, result)).to.equal(true);
     });
 
     it('should update a nested property value', () => {
         let source = createSourceObject();
         let result = update(source, {tom: {jack: {$set: 2}}});
-        expect(result.tom.jack).toBe(2);
-        expect(source).toEqual(createSourceObject());
+        expect(result.tom.jack).to.equal(2);
+        expect(deepEqual(source, createSourceObject())).to.equal(true);
         result.tom.jack = 1;
-        expect(result).toEqual(source);
+        expect(deepEqual(source, result)).to.equal(true);
     });
 
     it('should create nested property if not exist', () => {
         let source = createSourceObject();
         let result = update(source, {a: {b: {$set: 2}}});
-        expect(result.a.b).toBe(2);
-        expect(source).toEqual(createSourceObject());
+        expect(result.a.b).to.equal(2);
+        expect(deepEqual(source, createSourceObject())).to.equal(true);
         delete result.a;
-        expect(result).toEqual(source);
+        expect(deepEqual(source, result)).to.equal(true);
     });
 
     it('should recognize push command', () => {
         let source = createSourceObject();
         let result = update(source, {x: {y: {z: {$push: 4}}}});
-        expect(result.x.y.z).toEqual([1, 2, 3, 4]);
-        expect(source).toEqual(createSourceObject());
+        expect(deepEqual(result.x.y.z, [1, 2, 3, 4])).to.equal(true);
+        expect(deepEqual(source, createSourceObject())).to.equal(true);
         result.x.y.z.pop();
-        expect(result).toEqual(source);
+        expect(deepEqual(source, result)).to.equal(true);
     });
 
     it('should recognize unshift command', () => {
         let source = createSourceObject();
         let result = update(source, {x: {y: {z: {$unshift: 0}}}});
-        expect(result.x.y.z).toEqual([0, 1, 2, 3]);
-        expect(source).toEqual(createSourceObject());
+        expect(deepEqual(result.x.y.z, [0, 1, 2, 3])).to.equal(true);
+        expect(deepEqual(source, createSourceObject())).to.equal(true);
         result.x.y.z.shift();
-        expect(result).toEqual(source);
+        expect(deepEqual(source, result)).to.equal(true);
     });
 
     it('should recognize splice command', () => {
         let source = createSourceObject();
         let result = update(source, {x: {y: {z: {$splice: [1, 1, 6, 7, 8]}}}});
-        expect(result.x.y.z).toEqual([1, 6, 7, 8, 3]);
-        expect(source).toEqual(createSourceObject());
+        expect(deepEqual(result.x.y.z, [1, 6, 7, 8, 3])).to.equal(true);
+        expect(deepEqual(source, createSourceObject())).to.equal(true);
         result.x.y.z = [1, 2, 3];
-        expect(result).toEqual(source);
+        expect(deepEqual(source, result)).to.equal(true);
     });
 
     it('should recognize merge command', () => {
         let source = createSourceObject();
         let result = update(source, {x: {y: {$merge: {a: 1, b: 2, z: source.x.y.z}}}});
-        expect(result.x.y).toEqual({a: 1, b: 2, z: [1, 2, 3]});
-        expect(source).toEqual(createSourceObject());
+        expect(deepEqual(result.x.y, {a: 1, b: 2, z: [1, 2, 3]})).to.equal(true);
+        expect(deepEqual(source, createSourceObject())).to.equal(true);
     });
 
     it('should accept merge command on null objects', () => {
         let source = {x: {a: 1}};
         let extension = {b: 2};
         let result = update(source, {y: {$merge: extension}});
-        expect(result).toEqual({x: {a: 1}, y: {b: 2}});
-        expect(result.y).not.toBe(extension);
+        expect(deepEqual(result, {x: {a: 1}, y: {b: 2}})).to.equal(true);
+        expect(result.y).not.to.equal(extension);
     });
 
     it('should recognize defaults command', () => {
         let source = createSourceObject();
         let result = update(source, {x: {y: {$defaults: {a: 1, b: 2, z: 3}}}});
-        expect(result.x.y).toEqual({a: 1, b: 2, z: [1, 2, 3]});
-        expect(source).toEqual(createSourceObject());
+        expect(deepEqual(result.x.y, {a: 1, b: 2, z: [1, 2, 3]})).to.equal(true);
+        expect(deepEqual(source, createSourceObject())).to.equal(true);
     });
 
     it('should recognize invoke command', () => {
         let source = createSourceObject();
         let result = update(source, {tom: {jack: {$invoke(x) { return x * 2; }}}});
-        expect(result.tom.jack).toBe(2);
-        expect(source).toEqual(createSourceObject());
+        expect(result.tom.jack).to.equal(2);
+        expect(deepEqual(source, createSourceObject())).to.equal(true);
     });
 
     it('should recognize omit command', () => {
         let source = createSourceObject();
         let result = update(source, {tom: {jack: {$omit: true}}});
-        expect(result.tom.hasOwnProperty('jack')).toBe(false);
-        expect(source).toEqual(createSourceObject());
+        expect(result.tom.hasOwnProperty('jack')).to.equal(false);
+        expect(deepEqual(source, createSourceObject())).to.equal(true);
     });
 
     it('should accept assert boolean in omit command', () => {
         let source = createSourceObject();
         let result = update(source, {tom: {jack: {$omit: false}}});
-        expect(result).toEqual(source);
-        expect(source).toEqual(createSourceObject());
+        expect(deepEqual(source, result)).to.equal(true);
+        expect(deepEqual(source, createSourceObject())).to.equal(true);
     });
 
     it('should accept assert function in omit command', () => {
@@ -152,128 +154,128 @@ describe('update method', () => {
                 }
             }
         );
-        expect(result.tom.hasOwnProperty('jack')).toBe(false);
-        expect(result.x.y).toBe(source.x.y);
-        expect(source).toEqual(createSourceObject());
+        expect(result.tom.hasOwnProperty('jack')).to.equal(false);
+        expect(result.x.y).to.equal(source.x.y);
+        expect(deepEqual(source, createSourceObject())).to.equal(true);
     });
 
     it('should expose set function', () => {
         let source = createSourceObject();
         let result = set(source, ['tom', 'jack'], 2);
-        expect(result.tom.jack).toBe(2);
-        expect(source).toEqual(createSourceObject());
+        expect(result.tom.jack).to.equal(2);
+        expect(deepEqual(source, createSourceObject())).to.equal(true);
         result.tom.jack = 1;
-        expect(result).toEqual(source);
+        expect(deepEqual(source, result)).to.equal(true);
     });
 
     it('should accept string as property path', () => {
         let source = {x: 1};
         let result = set(source, 'x', 2);
-        expect(result).toEqual({x: 2});
+        expect(deepEqual(result, {x: 2})).to.equal(true);
     });
 
     it('should accept number as property path (especially 0)', () => {
         let source = [1, 2, 3];
         let result = set(source, 0, 4);
-        expect(result).toEqual([4, 2, 3]);
+        expect(deepEqual(result, [4, 2, 3])).to.equal(true);
     });
 
     it('should expose push function', () => {
         let source = createSourceObject();
         let result = push(source, ['x', 'y', 'z'], 4);
-        expect(result.x.y.z).toEqual([1, 2, 3, 4]);
-        expect(source).toEqual(createSourceObject());
+        expect(deepEqual(result.x.y.z, [1, 2, 3, 4])).to.equal(true);
+        expect(deepEqual(source, createSourceObject())).to.equal(true);
         result.x.y.z.pop();
-        expect(result).toEqual(source);
+        expect(deepEqual(source, result)).to.equal(true);
     });
 
     it('should expose unshift function', () => {
         let source = createSourceObject();
         let result = unshift(source, ['x', 'y', 'z'], 0);
-        expect(result.x.y.z).toEqual([0, 1, 2, 3]);
-        expect(source).toEqual(createSourceObject());
+        expect(deepEqual(result.x.y.z, [0, 1, 2, 3])).to.equal(true);
+        expect(deepEqual(source, createSourceObject())).to.equal(true);
         result.x.y.z.shift();
-        expect(result).toEqual(source);
+        expect(deepEqual(source, result)).to.equal(true);
     });
 
     it('should expose splice function', () => {
         let source = createSourceObject();
         let result = splice(source, ['x', 'y', 'z'], 1, 1, 6, 7, 8);
-        expect(result.x.y.z).toEqual([1, 6, 7, 8, 3]);
-        expect(source).toEqual(createSourceObject());
+        expect(deepEqual(result.x.y.z, [1, 6, 7, 8, 3])).to.equal(true);
+        expect(deepEqual(source, createSourceObject())).to.equal(true);
         result.x.y.z = [1, 2, 3];
-        expect(result).toEqual(source);
+        expect(deepEqual(source, result)).to.equal(true);
     });
 
     it('should expose merge function', () => {
         let source = createSourceObject();
         let result = merge(source, ['x', 'y'], {a: 1, b: 2, z: 3});
-        expect(result.x.y).toEqual({a: 1, b: 2, z: 3});
-        expect(source).toEqual(createSourceObject());
+        expect(deepEqual(result.x.y, {a: 1, b: 2, z: 3})).to.equal(true);
+        expect(deepEqual(source, createSourceObject())).to.equal(true);
     });
 
     it('should expose defaults function', () => {
         let source = createSourceObject();
         let result = defaults(source, ['x', 'y'], {a: 1, b: 2, z: 3});
-        expect(result.x.y).toEqual({a: 1, b: 2, z: [1, 2, 3]});
-        expect(source).toEqual(createSourceObject());
+        expect(deepEqual(result.x.y, {a: 1, b: 2, z: [1, 2, 3]})).to.equal(true);
+        expect(deepEqual(source, createSourceObject())).to.equal(true);
     });
 
     it('should expose invoke function', () => {
         let source = createSourceObject();
         let result = invoke(source, ['tom', 'jack'], x => x * 2);
-        expect(result.tom.jack).toBe(2);
-        expect(source).toEqual(createSourceObject());
+        expect(result.tom.jack).to.equal(2);
+        expect(deepEqual(source, createSourceObject())).to.equal(true);
     });
 
     it('should expose omit function', () => {
         let source = createSourceObject();
         let result = omit(source, ['tom', 'jack'], () => true);
-        expect(result.tom.hasOwnProperty('jack')).toBe(false);
-        expect(source).toEqual(createSourceObject());
+        expect(result.tom.hasOwnProperty('jack')).to.equal(false);
+        expect(deepEqual(source, createSourceObject())).to.equal(true);
     });
 
     describe('run with first level command', () => {
         it('should work with $set', () => {
             let source = {};
             let result = update(source, {$set: 1});
-            expect(result).toBe(1);
-            expect(source).toEqual({});
+            expect(result).to.equal(1);
+            expect(deepEqual(source, {})).to.equal(true);
         });
 
         it('should work with $push', () => {
             let source = [1, 2, 3];
             let result = update(source, {$push: 4});
-            expect(result).toEqual([1, 2, 3, 4]);
-            expect(source).toEqual([1, 2, 3]);
+            expect(deepEqual(result, [1, 2, 3, 4])).to.equal(true);
+            expect(deepEqual(source, [1, 2, 3])).to.equal(true);
         });
 
         it('should work with $unshift', () => {
             let source = [1, 2, 3];
             let result = update(source, {$unshift: 0});
-            expect(result).toEqual([0, 1, 2, 3]);
-            expect(source).toEqual([1, 2, 3]);
+            expect(deepEqual(result, [0, 1, 2, 3])).to.equal(true);
+            expect(deepEqual(source, [1, 2, 3])).to.equal(true);
         });
 
         it('should work with $merge', () => {
             let source = {foo: 1};
             let result = update(source, {$merge: {foo: 3, bar: 2}});
-            expect(result).toEqual({foo: 3, bar: 2});
-            expect(source).toEqual({foo: 1});
+            expect(deepEqual(result, {foo: 3, bar: 2})).to.equal(true);
+            expect(deepEqual(source, {foo: 1})).to.equal(true);
         });
 
         it('should work with $defaults', () => {
             let source = {foo: 1};
             let result = update(source, {$defaults: {foo: 2, bar: 2}});
-            expect(result).toEqual({foo: 1, bar: 2});
-            expect(source).toEqual({foo: 1});
+            expect(deepEqual(result, {foo: 1, bar: 2})).to.equal(true);
+            expect(deepEqual(source, {foo: 1})).to.equal(true);
         });
 
         it('should work with $invoke', () => {
             let source = 1;
             let result = update(source, {$invoke(x) { return x * 2; }});
-            expect(result).toEqual(2);
-            expect(source).toEqual(1);
+            expect(result).to.equal(2);
+            expect(source).to.equal(1);
         });
     });
 
@@ -281,43 +283,43 @@ describe('update method', () => {
         it('should work with $set', () => {
             let source = {};
             let result = set(source, null, 1);
-            expect(result).toBe(1);
-            expect(source).toEqual({});
+            expect(result).to.equal(1);
+            expect(deepEqual(source, {})).to.equal(true);
         });
 
         it('should work with $push', () => {
             let source = [1, 2, 3];
             let result = push(source, null, 4);
-            expect(result).toEqual([1, 2, 3, 4]);
-            expect(source).toEqual([1, 2, 3]);
+            expect(deepEqual(result, [1, 2, 3, 4])).to.equal(true);
+            expect(deepEqual(source, [1, 2, 3])).to.equal(true);
         });
 
         it('should work with $unshift', () => {
             let source = [1, 2, 3];
             let result = unshift(source, null, 0);
-            expect(result).toEqual([0, 1, 2, 3]);
-            expect(source).toEqual([1, 2, 3]);
+            expect(deepEqual(result, [0, 1, 2, 3])).to.equal(true);
+            expect(deepEqual(source, [1, 2, 3])).to.equal(true);
         });
 
         it('should work with $merge', () => {
             let source = {foo: 1};
             let result = merge(source, null, {bar: 2});
-            expect(result).toEqual({foo: 1, bar: 2});
-            expect(source).toEqual({foo: 1});
+            expect(deepEqual(result, {foo: 1, bar: 2})).to.equal(true);
+            expect(deepEqual(source, {foo: 1})).to.equal(true);
         });
 
         it('should work with $defaults', () => {
             let source = {foo: 1};
             let result = defaults(source, null, {foo: 2, bar: 2});
-            expect(result).toEqual({foo: 1, bar: 2});
-            expect(source).toEqual({foo: 1});
+            expect(deepEqual(result, {foo: 1, bar: 2})).to.equal(true);
+            expect(deepEqual(source, {foo: 1})).to.equal(true);
         });
 
         it('should work with $invoke', () => {
             let source = 1;
             let result = invoke(source, null, x => x * 2);
-            expect(result).toEqual(2);
-            expect(source).toEqual(1);
+            expect(result).to.equal(2);
+            expect(source).to.equal(1);
         });
     });
 });
