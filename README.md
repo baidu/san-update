@@ -1,4 +1,5 @@
-# san-update
+# san-update [![building status](https://travis-ci.org/ecomfe/san-update.svg?branch=master)](https://travis-ci.org/ecomfe/san-update)
+
 
 本库来源于[diffy-update](https://github.com/ecomfe/diffy-update)，在此基础上梳理了API并移除了差异计算功能，使之成为纯粹的对象更新工具，并纳入san体系中
 
