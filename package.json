@@ -5,7 +5,8 @@
   "main": "index.min.js",
   "scripts": {
     "test": "cross-env NODE_ENV=test mocha",
-    "test-cov": "cross-env NODE_ENV=test nyc --reporter=lcov --reporter=html mocha",
+    "test-cov": "cross-env NODE_ENV=test nyc --reporter=text --reporter=html mocha",
+    "lint": "fecs",
     "doc": "esdoc -c esdoc.json",
     "compile": "gulp",
     "clean": "gulp clean",
@@ -58,6 +59,7 @@
     "deep-eql": "^2.0.1",
     "esdoc": "^0.4.8",
     "esdoc-es7-plugin": "0.0.3",
+    "fecs": "^1.1.0",
     "gulp": "^3.9.1",
     "gulp-clean": "^0.3.2",
     "gulp-rename": "^1.2.2",

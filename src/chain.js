@@ -10,28 +10,21 @@ import update, {merge, availableCommandNames} from './update';
 
 const EMPTY_COMMANDS = {};
 
-let createUpdater = (value, commands) => {
-    let updater = availableCommandNames.reduce(
-        (updater, shortcut) => {
-            updater[shortcut] = (path, ...args) => {
-                let additionCommand = {['$' + shortcut]: args.length === 1 ? args[0] : args};
-                let newCommands = merge(commands, path, additionCommand);
-                return createUpdater(value, newCommands);
-            };
-            return updater;
-        },
-        {}
-    );
-
-    return Object.assign(
-        updater,
-        {
-            value() {
-                return update(value, commands);
-            }
+let createUpdater = (value, commands) => availableCommandNames.reduce(
+    (updater, shortcut) => {
+        updater[shortcut] = (path, ...args) => {
+            let additionCommand = {['$' + shortcut]: args.length === 1 ? args[0] : args};
+            let newCommands = merge(commands, path, additionCommand);
+            return createUpdater(value, newCommands);
+        };
+        return updater;
+    },
+    {
+        value() {
+            return update(value, commands);
         }
-    );
-};
+    }
+);
 
 /**
  * 包装一个对象为可链式调用更新的对象

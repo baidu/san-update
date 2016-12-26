@@ -10,10 +10,6 @@
 const OMIT_THIS_PROPERTY = {};
 
 let clone = target => {
-    if (Array.isArray(target)) {
-        return target.slice();
-    }
-
     let result = {};
     /* eslint-disable guard-for-in */
     for (let key in target) {
