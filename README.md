@@ -268,6 +268,56 @@ let levelUp = macro(command);
 
 与链式调用相同，`macro`的每一个操作都会生成一个全新的对象，原有的对象不会受到影响。
 
+## 细节
+
+### 关于无效更新
+
+假设有一个对象：
+
+```javascript
+let foo = {x: 1};
+```
+
+对其进行一次更新，但并没有修改其任何属性的值：
+
+```javascript
+import {set} from 'san-update';
+
+let bar = set(foo, 'x', 1);
+```
+
+这样的更新被称为“无效更新”。
+
+在`san-update`中，**无效更新会返回一个全新的对象**，即`bar === foo`为`false`。
+
+`san-update`尊重JavaScript这一语言的弱类型特性，因此不会假设使用了本库的环境是完全Immutable的，即不去假设`foo.x = 2`这样的代码**永不存在**。因此，为了避免后续对`foo`的非Immutable修改影响到`bar`的结构和内容，`san-update`会在任何时候都创建一个新的对象，无论这一更新是否为无效更新。
+
+### 关于属性缺失
+
+当对一个对象进行深度的操作时，可能会遇上属性缺失的情况：
+
+```javascript
+import {set} from 'san-update';
+
+let foo = {};
+let bar = set(foo, ['x', 'y'], 1);
+```
+
+如上代码，`foo`对象并没有`x`属性，此时对`x.y`进行修改会在路径访问上出现一个空缺。
+
+在[React Immutability Helpers](https://facebook.github.io/react/docs/update.html)中，这样的操作是会导致异常的。但在`san-update`中并不会，`san-update`会补齐访问路径中的所有属性，即上面的代码会正常返回一个`{x: {y: 1}}`的对象。
+
+也因为这一策略，`san-update`无法成为一个校验静态类型结构的工具，如果与系统配合使用，还需要自行选择[react-types](https://www.npmjs.com/package/react-types)或[JSON Schema](http://json-schema.org/)等工具确保类型的静态性和正确性。
+
+但需要注意的是，`san-update`只会用对象（`{}`）去补上不存在的属性，因此如果你期望一个数组的话，`san-update`得到的结果会与你的预期不符：
+
+```javascript
+import {push} from 'san-update';
+
+let foo = {};
+let bar = push(foo, 'x', 1); // Error: 没有push方法
+```
+
 ## API文档
 
 
