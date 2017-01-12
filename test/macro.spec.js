@@ -34,7 +34,7 @@ describe('macro method', () => {
     it('should correctly build an update function', () => {
         let update = macro()
             .set(['x', 'y', 'z'], 3)
-            .push('foo', 4)
+            .splice('foo', 1, 2, 4, 5)
             .merge('tom', {tinna: 2})
             .invoke('bob', i => i + 1)
             .build();
@@ -43,7 +43,7 @@ describe('macro method', () => {
             target,
             {
                 x: {y: {z: 3}},
-                foo: [1, 2, 3, 4],
+                foo: [1, 4, 5],
                 alice: 1,
                 bob: 3,
                 tom: {jack: 1, tinna: 2}

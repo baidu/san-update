@@ -72,6 +72,11 @@ describe('update method', () => {
         expect(deepEqual(source, result)).to.equal(true);
     });
 
+    it('should throw running push command on none array', () => {
+        let source = {x: {}};
+        expect(() => update(source, {x: {$push: 1}})).to.throw(Error);
+    });
+
     it('should recognize unshift command', () => {
         let source = createSourceObject();
         let result = update(source, {x: {y: {z: {$unshift: 0}}}});
@@ -81,6 +86,11 @@ describe('update method', () => {
         expect(deepEqual(source, result)).to.equal(true);
     });
 
+    it('should throw running unshift command on none array', () => {
+        let source = {x: {}};
+        expect(() => update(source, {x: {$unshift: 1}})).to.throw(Error);
+    });
+
     it('should recognize splice command', () => {
         let source = createSourceObject();
         let result = update(source, {x: {y: {z: {$splice: [1, 1, 6, 7, 8]}}}});
@@ -88,6 +98,11 @@ describe('update method', () => {
         expect(deepEqual(source, createSourceObject())).to.equal(true);
         result.x.y.z = [1, 2, 3];
         expect(deepEqual(source, result)).to.equal(true);
+    });
+
+    it('should throw running splice command on none array', () => {
+        let source = {x: {}};
+        expect(() => update(source, {x: {$splice: [1, 0, 1]}})).to.throw(Error);
     });
 
     it('should recognize merge command', () => {
@@ -104,6 +119,14 @@ describe('update method', () => {
         expect(deepEqual(result, {x: {a: 1}, y: {b: 2}})).to.equal(true);
         expect(result.y).not.to.equal(extension);
     });
+
+    it('should ignore prototype properties when merge', () => {
+        let source = {x: {a: 1}};
+        let prototype = {b: 2};
+        let extension = Object.create(prototype);
+        let result = update(source, {x: {$merge: extension}});
+        expect(deepEqual(result, source)).to.equal(true);
+    })
 
     it('should recognize defaults command', () => {
         let source = createSourceObject();
@@ -124,6 +147,12 @@ describe('update method', () => {
         let result = update(source, {tom: {jack: {$omit: true}}});
         expect(result.tom.hasOwnProperty('jack')).to.equal(false);
         expect(deepEqual(source, createSourceObject())).to.equal(true);
+    });
+
+    it('should recognize omit command on array', () => {
+        let source = [1, 2, 3];
+        let result = update(source, {1: {$omit: true}});
+        expect(deepEqual(result, [1, 3])).to.equal(true);
     });
 
     it('should accept assert boolean in omit command', () => {
@@ -231,6 +260,13 @@ describe('update method', () => {
     it('should expose omit function', () => {
         let source = createSourceObject();
         let result = omit(source, ['tom', 'jack'], () => true);
+        expect(result.tom.hasOwnProperty('jack')).to.equal(false);
+        expect(deepEqual(source, createSourceObject())).to.equal(true);
+    });
+
+    it('should assert to true by default on omit function', () => {
+        let source = createSourceObject();
+        let result = omit(source, ['tom', 'jack']);
         expect(result.tom.hasOwnProperty('jack')).to.equal(false);
         expect(deepEqual(source, createSourceObject())).to.equal(true);
     });

@@ -40,7 +40,7 @@ const AVAILABLE_COMMANDS = {
         let array = container[propertyName];
 
         if (!Array.isArray(array)) {
-            console.warn('Usage of $push command on non array object may produce unexpected result.');
+            throw new Error('Usage of $push command on non array object may produce unexpected result.');
         }
 
         return array.concat([newValue]);
@@ -50,7 +50,7 @@ const AVAILABLE_COMMANDS = {
         let array = container[propertyName];
 
         if (!Array.isArray(array)) {
-            console.warn('Usage of $unshift command on non array object may produce unexpected result.');
+            throw new Error('Usage of $unshift command on non array object may produce unexpected result.');
         }
 
         return [newValue].concat(array);
@@ -60,7 +60,7 @@ const AVAILABLE_COMMANDS = {
         let array = container[propertyName];
 
         if (!Array.isArray(array)) {
-            console.warn('Usage of $splice command on non array object may produce unexpected result.');
+            throw new Error('Usage of $splice command on non array object may produce unexpected result.');
         }
 
         return array.slice(0, start).concat(items).concat(array.slice(start + deleteCount));
@@ -68,11 +68,7 @@ const AVAILABLE_COMMANDS = {
 
     $merge(container, propertyName, extensions) {
         let target = container[propertyName];
-        if (target == null) {
-            return clone(extensions);
-        }
-
-        let newValue = clone(target);
+        let newValue = target ? clone(target) : {};
         for (let key in extensions) {
             if (extensions.hasOwnProperty(key)) {
                 newValue[key] = extensions[key];
