@@ -1,4 +1,7 @@
-# san-update [![building status](https://travis-ci.org/ecomfe/san-update.svg?branch=master)](https://travis-ci.org/ecomfe/san-update)
+# san-update
+[![building status](https://img.shields.io/travis/ecomfe/san-update.svg?style=flat)](https://travis-ci.org/ecomfe/san-update)
+[![Coverage Status](https://img.shields.io/coveralls/ecomfe/san-update.svg?style=flat)](https://coveralls.io/github/ecomfe/san-update)
+[![NPM version](https://img.shields.io/npm/v/san-update.svg?style=flat)](https://www.npmjs.com/package/san-update)
 
 
 本库来源于[diffy-update](https://github.com/ecomfe/diffy-update)，在此基础上梳理了API并移除了差异计算功能，使之成为纯粹的对象更新工具，并纳入san体系中
@@ -349,3 +352,8 @@ open doc/api/index.html
 ### 1.2.0
 
 - 添加`macro`功能用于构建更新函数。
+
+### 1.3.0
+
+- 在非数组上调用`$push`、`$unshift`、`$splice`指令将抛出异常
+- 修复了`$merge`指令在原属性存在和不存在时的行为差异
