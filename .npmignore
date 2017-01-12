@@ -1,5 +1,6 @@
 test/
 doc/
+coverage/
 .edpproj/
 .babelrc
 .fecsrc
