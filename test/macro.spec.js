@@ -1,5 +1,4 @@
 import {expect} from 'chai';
-import deepEqual from 'deep-eql';
 import {macro} from '../src/index';
 
 function createSourceObject() {
@@ -45,17 +44,14 @@ describe('macro method', () => {
             .invoke('bob', i => i + 1)
             .build();
         let target = update(createSourceObject());
-        let isEqual = deepEqual(
-            target,
-            {
-                x: {y: {z: 3}},
-                foo: [1, 4, 5],
-                alice: 1,
-                bob: 3,
-                tom: {jack: 1, tinna: 2}
-            }
-        );
-        expect(isEqual).to.equal(true);
+        let base = {
+            x: {y: {z: 3}},
+            foo: [1, 4, 5],
+            alice: 1,
+            bob: 3,
+            tom: {jack: 1, tinna: 2}
+        };
+        expect(target).to.deep.equal(base);
     });
 
     it('should fork an object for each method invocation', () => {
@@ -72,16 +68,13 @@ describe('macro method', () => {
             .invoke('bob', i => i + 1)
             .build();
         let target = update(createSourceObject());
-        let isEqual = deepEqual(
-            target,
-            {
-                x: {y: {z: 3}},
-                foo: [1, 2, 3, 4],
-                alice: 1,
-                bob: 3,
-                tom: {jack: 1, tinna: 2}
-            }
-        );
-        expect(isEqual).to.equal(true);
+        let base = {
+            x: {y: {z: 3}},
+            foo: [1, 2, 3, 4],
+            alice: 1,
+            bob: 3,
+            tom: {jack: 1, tinna: 2}
+        };
+        expect(target).to.deep.equal(base);
     });
 });

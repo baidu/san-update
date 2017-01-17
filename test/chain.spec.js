@@ -1,5 +1,4 @@
 import {expect} from 'chai';
-import deepEqual from 'deep-eql';
 import {immutable} from '../src/index';
 
 function createSourceObject() {
@@ -44,17 +43,14 @@ describe('chain method', () => {
             .merge('tom', {tinna: 2})
             .invoke('bob', i => i + 1)
             .value();
-        let isEqual = deepEqual(
-            target,
-            {
-                x: {y: {z: 3}},
-                foo: [1, 4, 5],
-                alice: 1,
-                bob: 3,
-                tom: {jack: 1, tinna: 2}
-            }
-        );
-        expect(isEqual).to.equal(true);
+        let base = {
+            x: {y: {z: 3}},
+            foo: [1, 4, 5],
+            alice: 1,
+            bob: 3,
+            tom: {jack: 1, tinna: 2}
+        };
+        expect(target).to.deep.equal(base);
     });
 
     it('should fork an object for each method invocation', () => {
