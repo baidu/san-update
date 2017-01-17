@@ -357,3 +357,7 @@ open doc/api/index.html
 
 - 在非数组上调用`$push`、`$unshift`、`$splice`指令将抛出异常
 - 修复了`$merge`指令在原属性存在和不存在时的行为差异
+
+### 1.4.0
+
+- 添加`$map`、`$filter`、`$reduce`、`$slice`、`$composeBefore`、`$composeAfter`指令
