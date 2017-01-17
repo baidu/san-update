@@ -26,9 +26,15 @@ describe('chain method', () => {
         expect(typeof updateable.push).to.equal('function');
         expect(typeof updateable.unshift).to.equal('function');
         expect(typeof updateable.splice).to.equal('function');
+        expect(typeof updateable.map).to.equal('function');
+        expect(typeof updateable.filter).to.equal('function');
+        expect(typeof updateable.reduce).to.equal('function');
+        expect(typeof updateable.slice).to.equal('function');
         expect(typeof updateable.defaults).to.equal('function');
         expect(typeof updateable.invoke).to.equal('function');
         expect(typeof updateable.omit).to.equal('function');
+        expect(typeof updateable.composeBefore).to.equal('function');
+        expect(typeof updateable.composeAfter).to.equal('function');
     });
 
     it('should correctly update object', () => {

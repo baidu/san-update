@@ -16,4 +16,11 @@ export {
     chain as immutable
 };
 export {macro};
-export {set, push, unshift, splice, merge, defaults, invoke, omit} from './update';
+export {
+    set,
+    push, unshift, splice, map, filter, reduce, slice,
+    merge, defaults,
+    invoke,
+    omit,
+    composeBefore, composeAfter
+} from './update';

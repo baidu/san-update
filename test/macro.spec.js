@@ -26,9 +26,15 @@ describe('macro method', () => {
         expect(typeof builder.push).to.equal('function');
         expect(typeof builder.unshift).to.equal('function');
         expect(typeof builder.splice).to.equal('function');
+        expect(typeof builder.map).to.equal('function');
+        expect(typeof builder.filter).to.equal('function');
+        expect(typeof builder.reduce).to.equal('function');
+        expect(typeof builder.slice).to.equal('function');
         expect(typeof builder.defaults).to.equal('function');
         expect(typeof builder.invoke).to.equal('function');
         expect(typeof builder.omit).to.equal('function');
+        expect(typeof builder.composeBefore).to.equal('function');
+        expect(typeof builder.composeAfter).to.equal('function');
     });
 
     it('should correctly build an update function', () => {

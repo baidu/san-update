@@ -1,6 +1,22 @@
 import {expect} from 'chai';
 import deepEqual from 'deep-eql';
-import {update, set, push, unshift, splice, merge, defaults, invoke, omit} from '../src/index';
+import {
+    update,
+    set,
+    push,
+    unshift,
+    splice,
+    map,
+    filter,
+    slice,
+    reduce,
+    merge,
+    defaults,
+    invoke,
+    omit,
+    composeBefore,
+    composeAfter
+} from '../src/index';
 
 function createSourceObject() {
     return {
@@ -105,6 +121,52 @@ describe('update method', () => {
         expect(() => update(source, {x: {$splice: [1, 0, 1]}})).to.throw(Error);
     });
 
+    it('should recognize map command', () => {
+        let source = {x: [1, 2, 3]};
+        let result = update(source, {x: {$map: value => value + 1}});
+        expect(deepEqual(result, {x: [2, 3, 4]})).to.equal(true);
+    });
+
+    it('should throw running map command on none array', () => {
+        let source = {x: {}};
+        expect(() => update(source, {x: {$map: value => value + 1}})).to.throw(Error);
+    });
+
+    it('should recognize filter command', () => {
+        let source = {x: [1, 2, 3]};
+        let result = update(source, {x: {$filter: value => value > 1}});
+        expect(deepEqual(result, {x: [2, 3]})).to.equal(true);
+    });
+
+    it('should throw running filter command on none array', () => {
+        let source = {x: {}};
+        expect(() => update(source, {x: {$filter: value => value > 1}})).to.throw(Error);
+    });
+
+    it('should recognize reduce command', () => {
+        let source = {x: [1, 2, 3]};
+        let result = update(source, {x: {$reduce: (sum, value) => sum + value}});
+        expect(deepEqual(result, {x: 6})).to.equal(true);
+        let resultSubstract = update(source, {x: {$reduce: [(base, value) => base - value, 10]}});
+        expect(deepEqual(resultSubstract, {x: 4})).to.equal(true);
+    });
+
+    it('should throw running filter command on none array', () => {
+        let source = {x: {}};
+        expect(() => update(source, {x: {$reduce: [(sum, value) => sum + value, 0]}})).to.throw(Error);
+    });
+
+    it('should recognize slice command', () => {
+        let source = {x: [1, 2, 3]};
+        let result = update(source, {x: {$slice: [1, -1]}});
+        expect(deepEqual(result, {x: [2]})).to.equal(true);
+    });
+
+    it('should throw running slice command on none array', () => {
+        let source = {x: {}};
+        expect(() => update(source, {x: {$slice: [1, 1]}})).to.throw(Error);
+    });
+
     it('should recognize merge command', () => {
         let source = createSourceObject();
         let result = update(source, {x: {y: {$merge: {a: 1, b: 2, z: source.x.y.z}}}});
@@ -153,6 +215,52 @@ describe('update method', () => {
         let source = [1, 2, 3];
         let result = update(source, {1: {$omit: true}});
         expect(deepEqual(result, [1, 3])).to.equal(true);
+    });
+
+    it('should recognize composeBefore command', () => {
+        let cache = [];
+        let raw = value => cache.push(value);
+        let before = value => {
+            cache.push(value);
+            return value + 1 ;
+        };
+        let source = {foo: raw};
+        let result = update(source, {foo: {$composeBefore: before}});
+        result.foo(1);
+        expect(deepEqual(cache, [1, 2])).to.equal(true);
+    });
+
+    it('should throw running composeBefore command on none function', () => {
+        let source = {foo: {}};
+        expect(() => update(source, {foo: {$composeBefore() {}}})).to.throw(Error);
+    });
+
+    it('should throw passing non function to composeBefore command', () => {
+        let source = {foo() {}};
+        expect(() => update(source, {foo: {$composeBefore: {}}})).to.throw(Error);
+    });
+
+    it('should recognize composeAfter command', () => {
+        let cache = [];
+        let raw = value => {
+            cache.push(value);
+            return value + 1;
+        };
+        let after = value => cache.push(value);
+        let source = {foo: raw};
+        let result = update(source, {foo: {$composeAfter: after}});
+        result.foo(1);
+        expect(deepEqual(cache, [1, 2])).to.equal(true);
+    });
+
+    it('should throw running composeAfter command on none function', () => {
+        let source = {foo: {}};
+        expect(() => update(source, {foo: {$composeAfter() {}}})).to.throw(Error);
+    });
+
+    it('should throw passing non function to composeAfter command', () => {
+        let source = {foo() {}};
+        expect(() => update(source, {foo: {$composeAfter: {}}})).to.throw(Error);
     });
 
     it('should accept assert boolean in omit command', () => {
@@ -236,6 +344,32 @@ describe('update method', () => {
         expect(deepEqual(source, result)).to.equal(true);
     });
 
+    it('should expose map function', () => {
+        let source = {x: [1, 2, 3]};
+        let result = map(source, 'x', x => x + 1);
+        expect(deepEqual(result, {x: [2, 3, 4]})).to.equal(true);
+    });
+
+    it('should expose filter function', () => {
+        let source = {x: [1, 2, 3]};
+        let result = filter(source, 'x', x => x > 1);
+        expect(deepEqual(result, {x: [2, 3]})).to.equal(true);
+    });
+
+    it('should expose reduce function', () => {
+        let source = {x: [1, 2, 3]};
+        let result = reduce(source, 'x', (sum, x) => sum + x);
+        expect(deepEqual(result, {x: 6})).to.equal(true);
+        let resultSubstract = reduce(source, 'x', (base, x) => base - x, 10);
+        expect(deepEqual(resultSubstract, {x: 4})).to.equal(true);
+    });
+
+    it('should expose slice function', () => {
+        let source = {x: [1, 2, 3]};
+        let result = slice(source, 'x', 1, -1);
+        expect(deepEqual(result, {x: [2]})).to.equal(true);
+    });
+
     it('should expose merge function', () => {
         let source = createSourceObject();
         let result = merge(source, ['x', 'y'], {a: 1, b: 2, z: 3});
@@ -293,6 +427,30 @@ describe('update method', () => {
             expect(deepEqual(source, [1, 2, 3])).to.equal(true);
         });
 
+        it('should work with $map', () => {
+            let source = [1, 2, 3];
+            let result = update(source, {$map: x => x + 1});
+            expect(result).to.deep.equal([2, 3, 4]);
+        });
+
+        it('should work with $filter', () => {
+            let source = [1, 2, 3];
+            let result = update(source, {$filter: x => x > 1});
+            expect(result).to.deep.equal([2, 3]);
+        });
+
+        it('should work with $reduce', () => {
+            let source = [1, 2, 3];
+            let result = update(source, {$reduce: (sum, x) => sum + x});
+            expect(result).to.equal(6);
+        });
+
+        it('should work with $slice', () => {
+            let source = [1, 2, 3];
+            let result = update(source, {$slice: [1, -1]});
+            expect(result).to.deep.equal([2]);
+        });
+
         it('should work with $merge', () => {
             let source = {foo: 1};
             let result = update(source, {$merge: {foo: 3, bar: 2}});
@@ -312,6 +470,30 @@ describe('update method', () => {
             let result = update(source, {$invoke(x) { return x * 2; }});
             expect(result).to.equal(2);
             expect(source).to.equal(1);
+        });
+
+        it('should work with $composeBefore', () => {
+            let cache = []
+            let raw = value => cache.push(value);
+            let before = value => {
+                cache.push(value);
+                return value + 1;
+            };
+            let result = update(raw, {$composeBefore: before});
+            result(1);
+            expect(cache).to.deep.equal([1, 2]);
+        });
+
+        it('should work with $composeAfter', () => {
+            let cache = []
+            let raw = value => {
+                cache.push(value);
+                return value + 1;
+            }
+            let after = value => cache.push(value);
+            let result = update(raw, {$composeAfter: after});
+            result(1);
+            expect(cache).to.deep.equal([1, 2]);
         });
     });
 
@@ -356,6 +538,30 @@ describe('update method', () => {
             let result = invoke(source, null, x => x * 2);
             expect(result).to.equal(2);
             expect(source).to.equal(1);
+        });
+
+        it('should work with $composeBefore', () => {
+            let cache = []
+            let raw = value => cache.push(value);
+            let before = value => {
+                cache.push(value);
+                return value + 1;
+            };
+            let result = composeBefore(raw, null, before);
+            result(1);
+            expect(cache).to.deep.equal([1, 2]);
+        });
+
+        it('should work with $composeAfter', () => {
+            let cache = []
+            let raw = value => {
+                cache.push(value);
+                return value + 1;
+            }
+            let after = value => cache.push(value);
+            let result = composeAfter(raw, null, after);
+            result(1);
+            expect(cache).to.deep.equal([1, 2]);
         });
     });
 });

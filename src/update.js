@@ -40,7 +40,7 @@ const AVAILABLE_COMMANDS = {
         let array = container[propertyName];
 
         if (!Array.isArray(array)) {
-            throw new Error('Usage of $push command on non array object may produce unexpected result.');
+            throw new Error('Usage of $push command on non array object is forbidden.');
         }
 
         return array.concat([newValue]);
@@ -50,7 +50,7 @@ const AVAILABLE_COMMANDS = {
         let array = container[propertyName];
 
         if (!Array.isArray(array)) {
-            throw new Error('Usage of $unshift command on non array object may produce unexpected result.');
+            throw new Error('Usage of $unshift command on non array object is forbidden.');
         }
 
         return [newValue].concat(array);
@@ -60,10 +60,56 @@ const AVAILABLE_COMMANDS = {
         let array = container[propertyName];
 
         if (!Array.isArray(array)) {
-            throw new Error('Usage of $splice command on non array object may produce unexpected result.');
+            throw new Error('Usage of $splice command on non array object is forbidden.');
         }
 
         return array.slice(0, start).concat(items).concat(array.slice(start + deleteCount));
+    },
+
+    $map(container, propertyName, callback) {
+        let array = container[propertyName];
+
+        if (!Array.isArray(array)) {
+            throw new Error('Usage of $map command on non array object is forbidden.');
+        }
+
+        return array.map(callback);
+    },
+
+    $filter(container, propertyName, callback) {
+        let array = container[propertyName];
+
+        if (!Array.isArray(array)) {
+            throw new Error('Usage of $filter command on non array object is forbidden.');
+        }
+
+        return array.filter(callback);
+    },
+
+    $slice(container, propertyName, [begin, end]) {
+        let array = container[propertyName];
+
+        if (!Array.isArray(array)) {
+            throw new Error('Usage of $slice command on non array object is forbidden.');
+        }
+
+        return array.slice(begin, end);
+    },
+
+    $reduce(container, propertyName, args) {
+        let array = container[propertyName];
+
+        if (!Array.isArray(array)) {
+            throw new Error('Usage of $reduce command on non array object is forbidden.');
+        }
+
+        // .reduce(callback)
+        if (typeof args === 'function') {
+            return array.reduce(args);
+        }
+
+        // .reduce(callback, initialValue)
+        return array.reduce(...args);
     },
 
     $merge(container, propertyName, extensions) {
@@ -103,6 +149,34 @@ const AVAILABLE_COMMANDS = {
         }
 
         return value;
+    },
+
+    $composeBefore(container, propertyName, before) {
+        let fn = container[propertyName];
+
+        if (typeof fn !== 'function') {
+            throw new Error('Usage of $composeBefore command on non function object is forbidden.');
+        }
+
+        if (typeof before !== 'function') {
+            throw new Error('Passing nont function object to $composeBefore command is forbidden');
+        }
+
+        return (...args) => fn(before(...args));
+    },
+
+    $composeAfter(container, propertyName, after) {
+        let fn = container[propertyName];
+
+        if (typeof fn !== 'function') {
+            throw new Error('Usage of $composeAfter command on non function object is forbidden.');
+        }
+
+        if (typeof after !== 'function') {
+            throw new Error('Passing nont function object to $composeAfter command is forbidden');
+        }
+
+        return (...args) => after(fn(...args));
     }
 };
 
@@ -119,7 +193,7 @@ export let availableCommandNames = AVAILABLE_COMMAND_KEYS.map(key => key.slice(1
  * - `$push`：向类型为数组的属性尾部添加元素
  * - `$unshift`：向类型为数组的属性头部添加元素
  * - `$merge`：将2个对象进行浅合并（不递归）
- * - `$defaults`：将指定对象的属性值填到原属性为`undefined`的属性上
+ * - `$defaults`：将指定对象的属性值填到原属性为'undefined`的'性上
  * - `$invoke`：用一个工厂函数的返回值作为`$set`指令的输入，工厂函数接受属性的旧值作为唯一的参数
  * - `$omit`：用于移除某个属性，传递`boolean`值来确认是否移除（`true`为移除），也可传递一个函数（参数为旧值）用其返回值确认是否移除
  *
@@ -241,7 +315,7 @@ function buildPathObject(path, value) {
  *
  * @param {Object} source 待更新的对象
  * @param {string?|Array.<string>|number?|Array.<number>} path 属性的路径，如果更新二层以上的属性则需要提供一个字符串数组，
- *     如果该参数为`undefined`或`null`，则会直接对`source`对象进行更新操作
+ *     如果该参数为'undefined`或`null`，则会直接对`source`对象进行更'操作
  * @param {*} value 用于更新的值
  * @return {Object} 更新后的新对象
  */
@@ -252,7 +326,7 @@ export let set = (source, path, value) => update(source, buildPathObject(path, {
  *
  * @param {Object} source 待更新的对象
  * @param {string?|Array.<string>|number?|Array.<number>} path 属性的路径，如果更新二层以上的属性则需要提供一个字符串数组，
- *     如果该参数为`undefined`或`null`，则会直接对`source`对象进行更新操作
+ *     如果该参数为'undefined`或`null`，则会直接对`source`对象进行更'操作
  * @param {*} value 用于更新的值
  * @return {Object} 更新后的新对象
  */
@@ -263,7 +337,7 @@ export let push = (source, path, value) => update(source, buildPathObject(path, 
  *
  * @param {Object} source 待更新的对象
  * @param {string?|Array.<string>|number?|Array.<number>} path 属性的路径，如果更新二层以上的属性则需要提供一个字符串数组，
- *     如果该参数为`undefined`或`null`，则会直接对`source`对象进行更新操作
+ *     如果该参数为'undefined`或`null`，则会直接对`source`对象进行更'操作
  * @param {*} value 用于更新的值
  * @return {Object} 更新后的新对象
  */
@@ -274,7 +348,7 @@ export let unshift = (source, path, value) => update(source, buildPathObject(pat
  *
  * @param {Object} source 待更新的对象
  * @param {string?|Array.<string>|number?|Array.<number>} path 属性的路径，如果更新二层以上的属性则需要提供一个字符串数组，
- *     如果该参数为`undefined`或`null`，则会直接对`source`对象进行更新操作
+ *     如果该参数为'undefined`或`null`，则会直接对`source`对象进行更'操作
  * @param {number} start 插入起始位置
  * @param {number} deleteCount 删除的元素个数
  * @param {...*} items 插入的元素
@@ -286,11 +360,59 @@ export let splice = (source, path, start, deleteCount, ...items) => {
 };
 
 /**
+ * 针对`$map`指令的快捷函数
+ *
+ * @param {Object} source 待更新的对象
+ * @param {string?|Array.<string>|number?|Array.<number>} path 属性的路径，如果更新二层以上的属性则需要提供一个字符串数组，
+ *     如果该参数为'undefined`或`null`，则会直接对`source`对象进行更'操作
+ * @param {Function} callback 回调函数
+ * @return {Object} 更新后的新对象
+ */
+export let map = (source, path, callback) => update(source, buildPathObject(path, {$map: callback}));
+
+/**
+ * 针对`$filter`指令的快捷函数
+ *
+ * @param {Object} source 待更新的对象
+ * @param {string?|Array.<string>|number?|Array.<number>} path 属性的路径，如果更新二层以上的属性则需要提供一个字符串数组，
+ *     如果该参数为'undefined`或`null`，则会直接对`source`对象进行更'操作
+ * @param {Function} callback 回调函数
+ * @return {Object} 更新后的新对象
+ */
+export let filter = (source, path, callback) => update(source, buildPathObject(path, {$filter: callback}));
+
+/**
+ * 针对`$reduce`指令的快捷函数
+ *
+ * @param {Object} source 待更新的对象
+ * @param {string?|Array.<string>|number?|Array.<number>} path 属性的路径，如果更新二层以上的属性则需要提供一个字符串数组，
+ *     如果该参数为'undefined`或`null`，则会直接对`source`对象进行更'操作
+ * @param {...*} args 调用`reduce`时的参数，可以为`{Function} callback`或`{Function} callback, {*} initialValue`
+ * @return {Object} 更新后的新对象
+ */
+export let reduce = (source, path, ...args) => {
+    let command = args.length === 1 ? {$reduce: args[0]} : {$reduce: args};
+    return update(source, buildPathObject(path, command));
+};
+
+/**
+ * 针对`$slice`指令的快捷函数
+ *
+ * @param {Object} source 待更新的对象
+ * @param {string?|Array.<string>|number?|Array.<number>} path 属性的路径，如果更新二层以上的属性则需要提供一个字符串数组，
+ *     如果该参数为'undefined`或`null`，则会直接对`source`对象进行更'操作
+ * @param {number} start 起始位置
+ * @param {number} end 结束位置
+ * @return {Object} 更新后的新对象
+ */
+export let slice = (source, path, start, end) => update(source, buildPathObject(path, {$slice: [start, end]}));
+
+/**
  * 针对`$merge`指令的快捷函数
  *
  * @param {Object} source 待更新的对象
  * @param {string?|Array.<string>|number?|Array.<number>} path 属性的路径，如果更新二层以上的属性则需要提供一个字符串数组，
- *     如果该参数为`undefined`或`null`，则会直接对`source`对象进行更新操作
+ *     如果该参数为'undefined`或`null`，则会直接对`source`对象进行更'操作
  * @param {*} value 用于更新的值
  * @return {Object} 更新后的新对象
  */
@@ -301,7 +423,7 @@ export let merge = (source, path, value) => update(source, buildPathObject(path,
  *
  * @param {Object} source 待更新的对象
  * @param {string?|Array.<string>|number?|Array.<number>} path 属性的路径，如果更新二层以上的属性则需要提供一个字符串数组，
- *     如果该参数为`undefined`或`null`，则会直接对`source`对象进行更新操作
+ *     如果该参数为'undefined`或`null`，则会直接对`source`对象进行更'操作
  * @param {*} value 用于更新的值
  * @return {Object} 更新后的新对象
  */
@@ -312,7 +434,7 @@ export let defaults = (source, path, value) => update(source, buildPathObject(pa
  *
  * @param {Object} source 待更新的对象
  * @param {string?|Array.<string>|number?|Array.<number>} path 属性的路径，如果更新二层以上的属性则需要提供一个字符串数组，
- *     如果该参数为`undefined`或`null`，则会直接对`source`对象进行更新操作
+ *     如果该参数为'undefined`或`null`，则会直接对`source`对象进行更'操作
  * @param {Function} factory 用于生成新值的工厂函数
  * @return {Object} 更新后的新对象
  */
@@ -323,8 +445,30 @@ export let invoke = (source, path, factory) => update(source, buildPathObject(pa
  *
  * @param {Object} source 待更新的对象
  * @param {string?|Array.<string>|number?|Array.<number>} path 属性的路径，如果更新二层以上的属性则需要提供一个字符串数组，
- *     如果该参数为`undefined`或`null`，则会直接对`source`对象进行更新操作
+ *     如果该参数为'undefined`或`null`，则会直接对`source`对象进行更'操作
  * @param {boolean|Function} assert 用于确认是否要移除属性的判断条件或函数
  * @return {Object} 更新后的新对象
  */
 export let omit = (source, path, assert = true) => update(source, buildPathObject(path, {$omit: assert}));
+
+/**
+ * 针对`$omit`指令的快捷函数，其中`assert`参数默认值为`true`
+ *
+ * @param {Object} source 待更新的对象
+ * @param {string?|Array.<string>|number?|Array.<number>} path 属性的路径，如果更新二层以上的属性则需要提供一个字符串数组，
+ *     如果该参数为'undefined`或`null`，则会直接对`source`对象进行更'操作
+ * @param {Function} before 包装函数，该函数会在原函数前执行，且返回值传递给原函数作为参数
+ * @return {Object} 更新后的新对象
+ */
+export let composeBefore = (source, path, before) => update(source, buildPathObject(path, {$composeBefore: before}));
+
+/**
+ * 针对`$omit`指令的快捷函数，其中`assert`参数默认值为`true`
+ *
+ * @param {Object} source 待更新的对象
+ * @param {string?|Array.<string>|number?|Array.<number>} path 属性的路径，如果更新二层以上的属性则需要提供一个字符串数组，
+ *     如果该参数为'undefined`或`null`，则会直接对`source`对象进行更'操作
+ * @param {Function} after 包装函数，该函数会在原函数后执行，且接收原函数返回值作为参数
+ * @return {Object} 更新后的新对象
+ */
+export let composeAfter = (source, path, after) => update(source, buildPathObject(path, {$composeAfter: after}));
