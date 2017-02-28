@@ -54,6 +54,15 @@ describe('macro method', () => {
         expect(target).to.deep.equal(base);
     });
 
+    it('should correctly build a differ', () => {
+        let withDiff = macro()
+            .invoke('x', i => i + 1)
+            .differ();
+        let [target, diff] = withDiff({x: 2});
+        expect(target).to.deep.equal({x: 3});
+        expect(diff).to.deep.equal({x: {$change: 'change', oldValue: 2, newValue: 3}});
+    });
+
     it('should fork an object for each method invocation', () => {
         let updateFoo = macro().set('foo', 1);
         let updateFooAndBob = updateFoo.set('bob', 3);

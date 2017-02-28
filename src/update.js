@@ -31,29 +31,81 @@ let find = (array, fn) => {
     return undefined;
 };
 
+let notEmpty = o => {
+    if (!o) {
+        return false;
+    }
+
+    for (let key in o) {
+        if (o.hasOwnProperty(key)) {
+            return true;
+        }
+    }
+
+    return false;
+};
+
 const AVAILABLE_COMMANDS = {
     $set(container, propertyName, newValue) {
-        return newValue;
+        let oldValue = container[propertyName];
+        if (newValue === oldValue) {
+            return [newValue, null];
+        }
+
+        return [
+            newValue,
+            {
+                $change: container.hasOwnProperty(propertyName) ? 'change' : 'add',
+                oldValue: oldValue,
+                newValue: newValue
+            }
+        ];
     },
 
-    $push(container, propertyName, newValue) {
+    $push(container, propertyName, item) {
         let array = container[propertyName];
 
         if (!Array.isArray(array)) {
             throw new Error('Usage of $push command on non array object is forbidden.');
         }
 
-        return array.concat([newValue]);
+        let newValue = array.concat([item]);
+        return [
+            newValue,
+            {
+                $change: 'change',
+                oldValue: array,
+                newValue: newValue,
+                splice: {
+                    index: array.length,
+                    deleteCount: 0,
+                    insertions: [item]
+                }
+            }
+        ];
     },
 
-    $unshift(container, propertyName, newValue) {
+    $unshift(container, propertyName, item) {
         let array = container[propertyName];
 
         if (!Array.isArray(array)) {
             throw new Error('Usage of $unshift command on non array object is forbidden.');
         }
 
-        return [newValue].concat(array);
+        let newValue = [item].concat(array);
+        return [
+            newValue,
+            {
+                $change: 'change',
+                oldValue: array,
+                newValue: newValue,
+                splice: {
+                    index: 0,
+                    deleteCount: 0,
+                    insertions: [item]
+                }
+            }
+        ];
     },
 
     $splice(container, propertyName, [start, deleteCount, ...items]) {
@@ -63,7 +115,20 @@ const AVAILABLE_COMMANDS = {
             throw new Error('Usage of $splice command on non array object is forbidden.');
         }
 
-        return array.slice(0, start).concat(items).concat(array.slice(start + deleteCount));
+        let newValue = array.slice(0, start).concat(items).concat(array.slice(start + deleteCount));
+        return [
+            newValue,
+            {
+                $change: 'change',
+                oldValue: array,
+                newValue: newValue,
+                splice: {
+                    index: start,
+                    deleteCount: deleteCount,
+                    insertions: items
+                }
+            }
+        ];
     },
 
     $map(container, propertyName, callback) {
@@ -73,7 +138,15 @@ const AVAILABLE_COMMANDS = {
             throw new Error('Usage of $map command on non array object is forbidden.');
         }
 
-        return array.map(callback);
+        let newValue = array.map(callback);
+        return [
+            newValue,
+            {
+                $change: 'change',
+                oldValue: array,
+                newValue: newValue
+            }
+        ];
     },
 
     $filter(container, propertyName, callback) {
@@ -83,7 +156,15 @@ const AVAILABLE_COMMANDS = {
             throw new Error('Usage of $filter command on non array object is forbidden.');
         }
 
-        return array.filter(callback);
+        let newValue = array.filter(callback);
+        return [
+            newValue,
+            {
+                $change: 'change',
+                oldValue: array,
+                newValue: newValue
+            }
+        ];
     },
 
     $slice(container, propertyName, [begin, end]) {
@@ -93,7 +174,15 @@ const AVAILABLE_COMMANDS = {
             throw new Error('Usage of $slice command on non array object is forbidden.');
         }
 
-        return array.slice(begin, end);
+        let newValue = array.slice(begin, end);
+        return [
+            newValue,
+            {
+                $change: 'change',
+                oldValue: array,
+                newValue: newValue
+            }
+        ];
     },
 
     $reduce(container, propertyName, args) {
@@ -103,52 +192,85 @@ const AVAILABLE_COMMANDS = {
             throw new Error('Usage of $reduce command on non array object is forbidden.');
         }
 
-        // .reduce(callback)
-        if (typeof args === 'function') {
-            return array.reduce(args);
-        }
-
-        // .reduce(callback, initialValue)
-        return array.reduce(...args);
+        // .reduce(callback) : .reduce(callback, initialValue)
+        let newValue = typeof args === 'function' ? array.reduce(args) : array.reduce(...args);
+        return [
+            newValue,
+            {
+                $change: 'change',
+                oldValue: array,
+                newValue: newValue
+            }
+        ];
     },
 
     $merge(container, propertyName, extensions) {
-        let target = container[propertyName];
-        let newValue = target ? clone(target) : {};
+        let target = container[propertyName] || {};
+        let newValue = clone(target);
+        let diff = {};
         for (let key in extensions) {
             if (extensions.hasOwnProperty(key)) {
-                newValue[key] = extensions[key];
+                let newPropertyValue = extensions[key];
+                let oldPropertyValue = target[key];
+                if (newPropertyValue !== oldPropertyValue) {
+                    newValue[key] = newPropertyValue;
+                    diff[key] = {
+                        $change: target.hasOwnProperty(key) ? 'change' : 'add',
+                        oldValue: oldPropertyValue,
+                        newValue: newPropertyValue
+                    };
+                }
             }
         }
 
-        return newValue;
+        return [newValue, diff];
     },
 
     $defaults(container, propertyName, defaults) {
         let target = container[propertyName];
-
         let newValue = clone(target);
+        let diff = {};
         for (let key in defaults) {
             if (defaults.hasOwnProperty(key) && newValue[key] === undefined) {
                 newValue[key] = defaults[key];
+                diff[key] = {
+                    $change: 'add',
+                    oldValue: undefined,
+                    newValue: defaults[key]
+                };
             }
         }
 
-        return newValue;
+        return [newValue, diff];
     },
 
     $invoke(container, propertyName, factory) {
-        return factory(container[propertyName]);
+        let newValue = factory(container[propertyName]);
+        return [
+            newValue,
+            {
+                $change: container.hasOwnProperty(propertyName) ? 'change' : 'add',
+                oldValue: container[propertyName],
+                newValue: newValue
+            }
+        ];
     },
 
     $omit(container, propertyName, assert) {
         let value = container[propertyName];
 
         if (assert === true || (typeof assert === 'function' && assert(value))) {
-            return OMIT_THIS_PROPERTY;
+            return [
+                OMIT_THIS_PROPERTY,
+                {
+                    $change: 'remove',
+                    oldValue: value,
+                    newValue: undefined
+                }
+            ];
         }
 
-        return value;
+        return [value, null];
     },
 
     $composeBefore(container, propertyName, before) {
@@ -162,7 +284,15 @@ const AVAILABLE_COMMANDS = {
             throw new Error('Passing nont function object to $composeBefore command is forbidden');
         }
 
-        return (...args) => fn(before(...args));
+        let newValue = (...args) => fn(before(...args));
+        return [
+            newValue,
+            {
+                $change: 'change',
+                oldValue: fn,
+                newValue: newValue
+            }
+        ];
     },
 
     $composeAfter(container, propertyName, after) {
@@ -176,16 +306,27 @@ const AVAILABLE_COMMANDS = {
             throw new Error('Passing nont function object to $composeAfter command is forbidden');
         }
 
-        return (...args) => after(fn(...args));
+        let newValue = (...args) => after(fn(...args));
+        return [
+            newValue,
+            {
+                $change: 'change',
+                oldValue: fn,
+                newValue: newValue
+            }
+        ];
     }
 };
 
 const AVAILABLE_COMMAND_KEYS = Object.keys(AVAILABLE_COMMANDS);
 
+/**
+ * @private
+ */
 export let availableCommandNames = AVAILABLE_COMMAND_KEYS.map(key => key.slice(1));
 
 /**
- * 根据提供的指令更新一个对象，返回更新后的新对象，原对象不会作任何的修改
+ * 根据提供的指令更新一个对象，返回更新后的新对象及差异对象，原对象不会作任何的修改
  *
  * 现有支持的指令包括：
  *
@@ -198,6 +339,111 @@ export let availableCommandNames = AVAILABLE_COMMAND_KEYS.map(key => key.slice(1
  * - `$omit`：用于移除某个属性，传递`boolean`值来确认是否移除（`true`为移除），也可传递一个函数（参数为旧值）用其返回值确认是否移除
  *
  * 可以在一次更新操作中对不同的属性用不同的指令：
+ *
+ * ```javascript
+ * import {withDiff} from 'san-update';
+ *
+ * let [newObject, diff] = withDiff(
+ *     source,
+ *     {
+ *         foo: {bar: {$set: 1}},
+ *         alice: {$push: 1},
+ *         tom: {jack: {$set: {x: 1}}
+ *     }
+ * );
+ * ```
+ *
+ * @param {Object} source 待更新的对象
+ * @param {Object} commands 用于更新的指令
+ * @return {[Object, Object]} 返回一个Tuple数组，其中第1项为更新结果，第2项为差异对象
+ */
+export let withDiff = (source, commands) => {
+    // 如果根节点就是个指令，那么直接对输入的对象进行操作，不需要再遍历属性了
+    let possibleRootCommand = find(AVAILABLE_COMMAND_KEYS, key => commands.hasOwnProperty(key));
+    if (possibleRootCommand) {
+        let wrapper = {source};
+        let commandValue = commands[possibleRootCommand];
+        return AVAILABLE_COMMANDS[possibleRootCommand](wrapper, 'source', commandValue);
+    }
+
+    // ({string} key) => [newValue, diff]
+    let executeCommand = key => {
+        let propertyCommand = commands[key];
+        let availableCommand = find(AVAILABLE_COMMAND_KEYS, key => propertyCommand.hasOwnProperty(key));
+
+        // 找到指令节点后，对当前属性进行更新，
+        // 如果这个节点不代表指令，那么肯定它的某个属性（或子属性）是指令，继续递归往下找
+        return availableCommand
+            ? AVAILABLE_COMMANDS[availableCommand](source, key, propertyCommand[availableCommand])
+            : withDiff(source[key] || {}, propertyCommand);
+    };
+
+    // 因为可能通过指令增加一些原本没有的属性，所以最后还要对`commands`做一次遍历来确保没有漏掉
+    let patchNewProperties = (result, diff) => {
+        for (let key in commands) {
+            if (result.hasOwnProperty(key) || !commands.hasOwnProperty(key)) {
+                continue;
+            }
+
+            let [newValue, propertyDiff] = executeCommand(key);
+            // 理论上因为全是新属性，所以这里的`propertyDiff`不可能是空的
+            diff[key] = propertyDiff;
+
+            if (newValue !== OMIT_THIS_PROPERTY) {
+                result[key] = newValue;
+            }
+        }
+
+        return [result, diff];
+    };
+
+    if (Array.isArray(source)) {
+        let result = [];
+        let diff = {};
+        for (let i = 0; i < source.length; i++) {
+            // 没有对应的指令，自然是不更新的，直接复制过去
+            if (!commands.hasOwnProperty(i)) {
+                result.push(source[i]);
+                continue;
+            }
+
+            let [newValue, propertyDiff] = executeCommand(i);
+            if (notEmpty(propertyDiff)) {
+                diff[i] = propertyDiff;
+            }
+            if (newValue !== OMIT_THIS_PROPERTY) {
+                result.push(newValue);
+            }
+        }
+
+        return patchNewProperties(result, diff);
+    }
+
+    let result = {};
+    let diff = {};
+    for (let key in source) {
+        // 没有对应的指令，自然是不更新的，直接复制过去
+        if (!commands.hasOwnProperty(key)) {
+            result[key] = source[key];
+            continue;
+        }
+
+        let [newValue, propertyDiff] = executeCommand(key);
+        if (notEmpty(propertyDiff)) {
+            diff[key] = propertyDiff;
+        }
+        if (newValue !== OMIT_THIS_PROPERTY) {
+            result[key] = newValue;
+        }
+    }
+
+    return patchNewProperties(result, diff);
+};
+
+/**
+ * 根据提供的指令更新一个对象，返回更新后的新对象，原对象不会作任何的修改
+ *
+ * 具体详情参考`withDiff`的文档
  *
  * ```javascript
  * import {update} from 'san-update';
@@ -214,261 +460,6 @@ export let availableCommandNames = AVAILABLE_COMMAND_KEYS.map(key => key.slice(1
  *
  * @param {Object} source 待更新的对象
  * @param {Object} commands 用于更新的指令
- * @return {Object} 更新后的新对象
+ * @return {Object} 更新后的对象
  */
-let update = (source, commands) => {
-    // 如果根节点就是个指令，那么直接对输入的对象进行操作，不需要再遍历属性了
-    let possibleRootCommand = find(AVAILABLE_COMMAND_KEYS, key => commands.hasOwnProperty(key));
-    if (possibleRootCommand) {
-        let wrapper = {source};
-        let commandValue = commands[possibleRootCommand];
-        return AVAILABLE_COMMANDS[possibleRootCommand](wrapper, 'source', commandValue);
-    }
-
-    let executeCommand = key => {
-        let propertyCommand = commands[key];
-        let availableCommand = find(AVAILABLE_COMMAND_KEYS, key => propertyCommand.hasOwnProperty(key));
-
-        // 找到指令节点后，对当前属性进行更新，
-        // 如果这个节点不代表指令，那么肯定它的某个属性（或子属性）是指令，继续递归往下找
-        let newValue = availableCommand
-            ? AVAILABLE_COMMANDS[availableCommand](source, key, propertyCommand[availableCommand])
-            : update(source[key] || {}, propertyCommand);
-
-        return newValue;
-    };
-
-    // 因为可能通过指令增加一些原本没有的属性，所以最后还要对`commands`做一次遍历来确保没有漏掉
-    let patchNewProperties = result => {
-        for (let key in commands) {
-            if (result.hasOwnProperty(key) || !commands.hasOwnProperty(key)) {
-                continue;
-            }
-
-            let newValue = executeCommand(key);
-
-            if (newValue !== OMIT_THIS_PROPERTY) {
-                result[key] = newValue;
-            }
-        }
-
-        return result;
-    };
-
-    if (Array.isArray(source)) {
-        let result = [];
-        for (let i = 0; i < source.length; i++) {
-            // 没有对应的指令，自然是不更新的，直接复制过去
-            if (!commands.hasOwnProperty(i)) {
-                result.push(source[i]);
-                continue;
-            }
-
-            let newValue = executeCommand(i);
-            if (newValue !== OMIT_THIS_PROPERTY) {
-                result.push(newValue);
-            }
-        }
-
-        return patchNewProperties(result);
-    }
-
-    let result = {};
-    for (let key in source) {
-        // 没有对应的指令，自然是不更新的，直接复制过去
-        if (!commands.hasOwnProperty(key)) {
-            result[key] = source[key];
-            continue;
-        }
-
-        let newValue = executeCommand(key);
-        if (newValue !== OMIT_THIS_PROPERTY) {
-            result[key] = newValue;
-        }
-    }
-
-    return patchNewProperties(result);
-};
-
-export default update;
-
-function buildPathObject(path, value) {
-    if (path == null) {
-        return value;
-    }
-
-    if (!Array.isArray(path)) {
-        path = [path];
-    }
-
-    let result = {};
-    let current = result;
-    for (let i = 0; i < path.length - 1; i++) {
-        current = current[path[i]] = {};
-    }
-    current[path[path.length - 1]] = value;
-    return result;
-}
-
-/**
- * 针对`$set`指令的快捷函数
- *
- * @param {Object} source 待更新的对象
- * @param {string?|Array.<string>|number?|Array.<number>} path 属性的路径，如果更新二层以上的属性则需要提供一个字符串数组，
- *     如果该参数为'undefined`或`null`，则会直接对`source`对象进行更'操作
- * @param {*} value 用于更新的值
- * @return {Object} 更新后的新对象
- */
-export let set = (source, path, value) => update(source, buildPathObject(path, {$set: value}));
-
-/**
- * 针对`$push`指令的快捷函数
- *
- * @param {Object} source 待更新的对象
- * @param {string?|Array.<string>|number?|Array.<number>} path 属性的路径，如果更新二层以上的属性则需要提供一个字符串数组，
- *     如果该参数为'undefined`或`null`，则会直接对`source`对象进行更'操作
- * @param {*} value 用于更新的值
- * @return {Object} 更新后的新对象
- */
-export let push = (source, path, value) => update(source, buildPathObject(path, {$push: value}));
-
-/**
- * 针对`$unshift`指令的快捷函数
- *
- * @param {Object} source 待更新的对象
- * @param {string?|Array.<string>|number?|Array.<number>} path 属性的路径，如果更新二层以上的属性则需要提供一个字符串数组，
- *     如果该参数为'undefined`或`null`，则会直接对`source`对象进行更'操作
- * @param {*} value 用于更新的值
- * @return {Object} 更新后的新对象
- */
-export let unshift = (source, path, value) => update(source, buildPathObject(path, {$unshift: value}));
-
-/**
- * 针对`$splice`指令的快捷函数
- *
- * @param {Object} source 待更新的对象
- * @param {string?|Array.<string>|number?|Array.<number>} path 属性的路径，如果更新二层以上的属性则需要提供一个字符串数组，
- *     如果该参数为'undefined`或`null`，则会直接对`source`对象进行更'操作
- * @param {number} start 插入起始位置
- * @param {number} deleteCount 删除的元素个数
- * @param {...*} items 插入的元素
- * @return {Object} 更新后的新对象
- */
-export let splice = (source, path, start, deleteCount, ...items) => {
-    let args = [start, deleteCount, ...items];
-    return update(source, buildPathObject(path, {$splice: args}));
-};
-
-/**
- * 针对`$map`指令的快捷函数
- *
- * @param {Object} source 待更新的对象
- * @param {string?|Array.<string>|number?|Array.<number>} path 属性的路径，如果更新二层以上的属性则需要提供一个字符串数组，
- *     如果该参数为'undefined`或`null`，则会直接对`source`对象进行更'操作
- * @param {Function} callback 回调函数
- * @return {Object} 更新后的新对象
- */
-export let map = (source, path, callback) => update(source, buildPathObject(path, {$map: callback}));
-
-/**
- * 针对`$filter`指令的快捷函数
- *
- * @param {Object} source 待更新的对象
- * @param {string?|Array.<string>|number?|Array.<number>} path 属性的路径，如果更新二层以上的属性则需要提供一个字符串数组，
- *     如果该参数为'undefined`或`null`，则会直接对`source`对象进行更'操作
- * @param {Function} callback 回调函数
- * @return {Object} 更新后的新对象
- */
-export let filter = (source, path, callback) => update(source, buildPathObject(path, {$filter: callback}));
-
-/**
- * 针对`$reduce`指令的快捷函数
- *
- * @param {Object} source 待更新的对象
- * @param {string?|Array.<string>|number?|Array.<number>} path 属性的路径，如果更新二层以上的属性则需要提供一个字符串数组，
- *     如果该参数为'undefined`或`null`，则会直接对`source`对象进行更'操作
- * @param {...*} args 调用`reduce`时的参数，可以为`{Function} callback`或`{Function} callback, {*} initialValue`
- * @return {Object} 更新后的新对象
- */
-export let reduce = (source, path, ...args) => {
-    let command = args.length === 1 ? {$reduce: args[0]} : {$reduce: args};
-    return update(source, buildPathObject(path, command));
-};
-
-/**
- * 针对`$slice`指令的快捷函数
- *
- * @param {Object} source 待更新的对象
- * @param {string?|Array.<string>|number?|Array.<number>} path 属性的路径，如果更新二层以上的属性则需要提供一个字符串数组，
- *     如果该参数为'undefined`或`null`，则会直接对`source`对象进行更'操作
- * @param {number} start 起始位置
- * @param {number} end 结束位置
- * @return {Object} 更新后的新对象
- */
-export let slice = (source, path, start, end) => update(source, buildPathObject(path, {$slice: [start, end]}));
-
-/**
- * 针对`$merge`指令的快捷函数
- *
- * @param {Object} source 待更新的对象
- * @param {string?|Array.<string>|number?|Array.<number>} path 属性的路径，如果更新二层以上的属性则需要提供一个字符串数组，
- *     如果该参数为'undefined`或`null`，则会直接对`source`对象进行更'操作
- * @param {*} value 用于更新的值
- * @return {Object} 更新后的新对象
- */
-export let merge = (source, path, value) => update(source, buildPathObject(path, {$merge: value}));
-
-/**
- * 针对`$defaults`指令的快捷函数
- *
- * @param {Object} source 待更新的对象
- * @param {string?|Array.<string>|number?|Array.<number>} path 属性的路径，如果更新二层以上的属性则需要提供一个字符串数组，
- *     如果该参数为'undefined`或`null`，则会直接对`source`对象进行更'操作
- * @param {*} value 用于更新的值
- * @return {Object} 更新后的新对象
- */
-export let defaults = (source, path, value) => update(source, buildPathObject(path, {$defaults: value}));
-
-/**
- * 针对`$invoke`指令的快捷函数
- *
- * @param {Object} source 待更新的对象
- * @param {string?|Array.<string>|number?|Array.<number>} path 属性的路径，如果更新二层以上的属性则需要提供一个字符串数组，
- *     如果该参数为'undefined`或`null`，则会直接对`source`对象进行更'操作
- * @param {Function} factory 用于生成新值的工厂函数
- * @return {Object} 更新后的新对象
- */
-export let invoke = (source, path, factory) => update(source, buildPathObject(path, {$invoke: factory}));
-
-/**
- * 针对`$omit`指令的快捷函数，其中`assert`参数默认值为`true`
- *
- * @param {Object} source 待更新的对象
- * @param {string?|Array.<string>|number?|Array.<number>} path 属性的路径，如果更新二层以上的属性则需要提供一个字符串数组，
- *     如果该参数为'undefined`或`null`，则会直接对`source`对象进行更'操作
- * @param {boolean|Function} assert 用于确认是否要移除属性的判断条件或函数
- * @return {Object} 更新后的新对象
- */
-export let omit = (source, path, assert = true) => update(source, buildPathObject(path, {$omit: assert}));
-
-/**
- * 针对`$omit`指令的快捷函数，其中`assert`参数默认值为`true`
- *
- * @param {Object} source 待更新的对象
- * @param {string?|Array.<string>|number?|Array.<number>} path 属性的路径，如果更新二层以上的属性则需要提供一个字符串数组，
- *     如果该参数为'undefined`或`null`，则会直接对`source`对象进行更'操作
- * @param {Function} before 包装函数，该函数会在原函数前执行，且返回值传递给原函数作为参数
- * @return {Object} 更新后的新对象
- */
-export let composeBefore = (source, path, before) => update(source, buildPathObject(path, {$composeBefore: before}));
-
-/**
- * 针对`$omit`指令的快捷函数，其中`assert`参数默认值为`true`
- *
- * @param {Object} source 待更新的对象
- * @param {string?|Array.<string>|number?|Array.<number>} path 属性的路径，如果更新二层以上的属性则需要提供一个字符串数组，
- *     如果该参数为'undefined`或`null`，则会直接对`source`对象进行更'操作
- * @param {Function} after 包装函数，该函数会在原函数后执行，且接收原函数返回值作为参数
- * @return {Object} 更新后的新对象
- */
-export let composeAfter = (source, path, after) => update(source, buildPathObject(path, {$composeAfter: after}));
+export let update = (source, commands) => withDiff(source, commands)[0];

@@ -6,7 +6,8 @@
  * @author otakustay
  */
 
-import update, {merge, availableCommandNames} from './update';
+import {update, withDiff, availableCommandNames} from './update';
+import {merge} from './shortcut';
 
 const EMPTY_COMMANDS = {};
 
@@ -22,6 +23,10 @@ let createUpdater = (value, commands) => availableCommandNames.reduce(
     {
         value() {
             return update(value, commands);
+        },
+
+        withDiff() {
+            return withDiff(value, commands);
         }
     }
 );

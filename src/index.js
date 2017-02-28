@@ -6,12 +6,11 @@
  * @author otakustay
  */
 
-import update from './update';
 import chain from './chain';
 import macro from './macro';
 
+export {update, withDiff} from './update';
 export {
-    update as update,
     chain as chain,
     chain as immutable
 };
@@ -23,4 +22,4 @@ export {
     invoke,
     omit,
     composeBefore, composeAfter
-} from './update';
+} from './shortcut';

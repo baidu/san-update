@@ -61,7 +61,7 @@ newObject.foo.bar = 1;
 
 ### 基本场景
 
-使用编译后的默认模块可以提供对象更新的功能：
+`update`函数可以提供对象更新的功能：
 
 ```javascript
 import {update} from 'san-update';
@@ -271,6 +271,62 @@ let levelUp = macro(command);
 ```
 
 与链式调用相同，`macro`的每一个操作都会生成一个全新的对象，原有的对象不会受到影响。
+
+### 差异获取
+
+`withDiff`函数可在更新对象的同时提供一个新旧对象的差异：
+
+```javascript
+import {withDiff} from 'san-update';
+
+let source = {
+    name: {
+        firstName: 'Navy',
+        lastName: 'Wong'
+    }
+};
+let [target, diff] = withDiff(source, {name: {firstName: {$set: 'Petty'}}});
+
+console.log(target);
+// {
+//     name: {
+//         firstName: 'Petty',
+//         lastName: 'Wong'
+//     }
+// }
+
+console.log(diff);
+// {
+//     name: {
+//         firstName: {
+//             $change: 'change',
+//             oldValue: 'Navy',
+//             newValue: 'Petty'
+//         }
+//     }
+// }
+```
+
+差异是一个与更新的对象结构相似的对象，当一个属性有更新时，该属性下会存在名为`$change`的属性，该属性标识这个对象有更新的同时也提供了更新的形式，其值可分为`"change"`、`"add"`或`"remove"`。因此，为了避免后续对
+
+一个差异对象的结构如下：
+
+```javascript
+{
+    $change: {string},
+    oldValue: {*},
+    newValue: {*},
+    splice: {
+        index: {number},
+        deleteCount: {number},
+        insertions: {Array}
+    }
+}
+```
+
+其中`oldValue`和`newValue`标记更新前后的值，当`$change`为`"remove"`时`newValue`的值恒定为`undefined`，当`$change`为`"add"`时则`oldValue`的值恒定为`undefined`。因此，为了避免后续对
+
+如果使用`push`、`unshift`、`splice`指令对数组进行了操作，则会在差异对象中生成一个`splice`属性，其中的`index`、`deleteCount`、`insertions`表达了更新的位置、删除的数量、插入的新元素。需要注意的是如果使用`invoke`、`set`等操作对数组进行更新则不会有`splice`属性产生，数组将被当作普通的对象仅提供新旧值。
 
 ## 细节
 

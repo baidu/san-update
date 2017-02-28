@@ -6,7 +6,8 @@
  * @author otakustay
  */
 
-import update, {merge, availableCommandNames} from './update';
+import {update, withDiff, availableCommandNames} from './update';
+import {merge} from './shortcut';
 
 const EMPTY = {};
 
@@ -22,9 +23,15 @@ let createMacro = (commands = EMPTY) => availableCommandNames.reduce(
     {
         build() {
             return value => update(value, commands);
+        },
+
+        differ() {
+            return value => withDiff(value, commands);
         }
     }
 );
+
+const INITIAL_MACRO = createMacro();
 
 /**
  * 包装一个更新指令为Macro
@@ -34,4 +41,4 @@ let createMacro = (commands = EMPTY) => availableCommandNames.reduce(
  * @param {Object} [commands] 初始指令，可选
  * @return {Object} 包含所有更新快捷方式的Macro
  */
-export default createMacro;
+export default commands => (commands ? createMacro(commands) : INITIAL_MACRO);

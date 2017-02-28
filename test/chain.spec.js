@@ -53,6 +53,12 @@ describe('chain method', () => {
         expect(target).to.deep.equal(base);
     });
 
+    it('should correctly update object with diff', () => {
+        let [target, diff] = immutable({x: 2}).invoke('x', i => i + 1).withDiff();
+        expect(target).to.deep.equal({x: 3});
+        expect(diff).to.deep.equal({x: {$change: 'change', oldValue: 2, newValue: 3}});
+    })
+
     it('should fork an object for each method invocation', () => {
         let source = createSourceObject();
         let a = immutable(source).set('foo', 4);
