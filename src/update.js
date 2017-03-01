@@ -45,6 +45,37 @@ let notEmpty = o => {
     return false;
 };
 
+let indexOf = (array, o) => {
+    for (let i = 0; i < array.length; i++) {
+        if (array[i] === o) {
+            return i;
+        }
+    }
+
+    return -1;
+};
+
+let diffObject = (type, oldValue, newValue) => {
+    return {
+        $change: type,
+        oldValue: oldValue,
+        newValue: newValue
+    };
+};
+
+let arrayDiffObject = (oldValue, newValue, spliceIndex, deleteCount, insertions) => {
+    return {
+        $change: 'change',
+        oldValue: oldValue,
+        newValue: newValue,
+        splice: {
+            index: spliceIndex,
+            deleteCount: deleteCount,
+            insertions: insertions
+        }
+    };
+};
+
 const AVAILABLE_COMMANDS = {
     $set(container, propertyName, newValue) {
         let oldValue = container[propertyName];
@@ -54,11 +85,7 @@ const AVAILABLE_COMMANDS = {
 
         return [
             newValue,
-            {
-                $change: container.hasOwnProperty(propertyName) ? 'change' : 'add',
-                oldValue: oldValue,
-                newValue: newValue
-            }
+            diffObject(container.hasOwnProperty(propertyName) ? 'change' : 'add', oldValue, newValue)
         ];
     },
 
@@ -72,16 +99,7 @@ const AVAILABLE_COMMANDS = {
         let newValue = array.concat([item]);
         return [
             newValue,
-            {
-                $change: 'change',
-                oldValue: array,
-                newValue: newValue,
-                splice: {
-                    index: array.length,
-                    deleteCount: 0,
-                    insertions: [item]
-                }
-            }
+            arrayDiffObject(array, newValue, array.length, 0, [item])
         ];
     },
 
@@ -95,16 +113,81 @@ const AVAILABLE_COMMANDS = {
         let newValue = [item].concat(array);
         return [
             newValue,
-            {
-                $change: 'change',
-                oldValue: array,
-                newValue: newValue,
-                splice: {
-                    index: 0,
-                    deleteCount: 0,
-                    insertions: [item]
-                }
-            }
+            arrayDiffObject(array, newValue, 0, 0, [item])
+        ];
+    },
+
+    $pop(container, propertyName, assert) {
+        let array = container[propertyName];
+
+        if (!Array.isArray(array)) {
+            throw new Error('Usage of $pop command on non array object is forbidden.');
+        }
+
+        if (array.length && (assert === true || (typeof assert === 'function' && assert(array)))) {
+            let newValue = array.slice(0, -1);
+            return [
+                newValue,
+                arrayDiffObject(array, newValue, array.length, 1, [])
+            ];
+        }
+
+        return [array, null];
+    },
+
+    $shift(container, propertyName, assert) {
+        let array = container[propertyName];
+
+        if (!Array.isArray(array)) {
+            throw new Error('Usage of $shift command on non array object is forbidden.');
+        }
+
+        if (array.length && (assert === true || (typeof assert === 'function' && assert(array)))) {
+            let newValue = array.slice(1);
+            return [
+                newValue,
+                arrayDiffObject(array, newValue, array.length, 1, [])
+            ];
+        }
+
+        return [array, null];
+    },
+
+    $removeAt(container, propertyName, index) {
+        let array = container[propertyName];
+
+        if (!Array.isArray(array)) {
+            throw new Error('Usage of $removeAt command on non array object is forbidden.');
+        }
+
+        if (index >= array.length || index < 0) {
+            return [array, null];
+        }
+
+        let newValue = array.slice(0, index).concat(array.slice(index + 1));
+        return [
+            newValue,
+            arrayDiffObject(array, newValue, index, 1, [])
+        ];
+    },
+
+    $remove(container, propertyName, item) {
+        let array = container[propertyName];
+
+        if (!Array.isArray(array)) {
+            throw new Error('Usage of $removeAt command on non array object is forbidden.');
+        }
+
+        let index = indexOf(array, item);
+
+        if (index === -1) {
+            return [array, null];
+        }
+
+        let newValue = array.slice(0, index).concat(array.slice(index + 1));
+        return [
+            newValue,
+            arrayDiffObject(array, newValue, index, 1, [])
         ];
     },
 
@@ -118,16 +201,7 @@ const AVAILABLE_COMMANDS = {
         let newValue = array.slice(0, start).concat(items).concat(array.slice(start + deleteCount));
         return [
             newValue,
-            {
-                $change: 'change',
-                oldValue: array,
-                newValue: newValue,
-                splice: {
-                    index: start,
-                    deleteCount: deleteCount,
-                    insertions: items
-                }
-            }
+            arrayDiffObject(array, newValue, start, deleteCount, items)
         ];
     },
 
@@ -141,11 +215,7 @@ const AVAILABLE_COMMANDS = {
         let newValue = array.map(callback);
         return [
             newValue,
-            {
-                $change: 'change',
-                oldValue: array,
-                newValue: newValue
-            }
+            diffObject('change', array, newValue)
         ];
     },
 
@@ -159,11 +229,7 @@ const AVAILABLE_COMMANDS = {
         let newValue = array.filter(callback);
         return [
             newValue,
-            {
-                $change: 'change',
-                oldValue: array,
-                newValue: newValue
-            }
+            diffObject('change', array, newValue)
         ];
     },
 
@@ -177,11 +243,7 @@ const AVAILABLE_COMMANDS = {
         let newValue = array.slice(begin, end);
         return [
             newValue,
-            {
-                $change: 'change',
-                oldValue: array,
-                newValue: newValue
-            }
+            diffObject('change', array, newValue)
         ];
     },
 
@@ -196,11 +258,7 @@ const AVAILABLE_COMMANDS = {
         let newValue = typeof args === 'function' ? array.reduce(args) : array.reduce(...args);
         return [
             newValue,
-            {
-                $change: 'change',
-                oldValue: array,
-                newValue: newValue
-            }
+            diffObject('change', array, newValue)
         ];
     },
 
@@ -214,11 +272,8 @@ const AVAILABLE_COMMANDS = {
                 let oldPropertyValue = target[key];
                 if (newPropertyValue !== oldPropertyValue) {
                     newValue[key] = newPropertyValue;
-                    diff[key] = {
-                        $change: target.hasOwnProperty(key) ? 'change' : 'add',
-                        oldValue: oldPropertyValue,
-                        newValue: newPropertyValue
-                    };
+                    let changeType = target.hasOwnProperty(key) ? 'change' : 'add';
+                    diff[key] = diffObject(changeType, oldPropertyValue, newPropertyValue);
                 }
             }
         }
@@ -233,11 +288,7 @@ const AVAILABLE_COMMANDS = {
         for (let key in defaults) {
             if (defaults.hasOwnProperty(key) && newValue[key] === undefined) {
                 newValue[key] = defaults[key];
-                diff[key] = {
-                    $change: 'add',
-                    oldValue: undefined,
-                    newValue: defaults[key]
-                };
+                diff[key] = diffObject('add', undefined, defaults[key]);
             }
         }
 
@@ -248,11 +299,7 @@ const AVAILABLE_COMMANDS = {
         let newValue = factory(container[propertyName]);
         return [
             newValue,
-            {
-                $change: container.hasOwnProperty(propertyName) ? 'change' : 'add',
-                oldValue: container[propertyName],
-                newValue: newValue
-            }
+            diffObject(container.hasOwnProperty(propertyName) ? 'change' : 'add', container[propertyName], newValue)
         ];
     },
 
@@ -262,11 +309,7 @@ const AVAILABLE_COMMANDS = {
         if (assert === true || (typeof assert === 'function' && assert(value))) {
             return [
                 OMIT_THIS_PROPERTY,
-                {
-                    $change: 'remove',
-                    oldValue: value,
-                    newValue: undefined
-                }
+                diffObject('remove', value, undefined)
             ];
         }
 
@@ -281,17 +324,13 @@ const AVAILABLE_COMMANDS = {
         }
 
         if (typeof before !== 'function') {
-            throw new Error('Passing nont function object to $composeBefore command is forbidden');
+            throw new Error('Passing non function object to $composeBefore command is forbidden');
         }
 
         let newValue = (...args) => fn(before(...args));
         return [
             newValue,
-            {
-                $change: 'change',
-                oldValue: fn,
-                newValue: newValue
-            }
+            diffObject('change', fn, newValue)
         ];
     },
 
@@ -303,17 +342,13 @@ const AVAILABLE_COMMANDS = {
         }
 
         if (typeof after !== 'function') {
-            throw new Error('Passing nont function object to $composeAfter command is forbidden');
+            throw new Error('Passing non function object to $composeAfter command is forbidden');
         }
 
         let newValue = (...args) => after(fn(...args));
         return [
             newValue,
-            {
-                $change: 'change',
-                oldValue: fn,
-                newValue: newValue
-            }
+            diffObject('change', fn, newValue)
         ];
     }
 };

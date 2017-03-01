@@ -24,6 +24,10 @@ describe('chain method', () => {
         expect(typeof updateable.merge).to.equal('function');
         expect(typeof updateable.push).to.equal('function');
         expect(typeof updateable.unshift).to.equal('function');
+        expect(typeof updateable.pop).to.equal('function');
+        expect(typeof updateable.shift).to.equal('function');
+        expect(typeof updateable.removeAt).to.equal('function');
+        expect(typeof updateable.remove).to.equal('function');
         expect(typeof updateable.splice).to.equal('function');
         expect(typeof updateable.map).to.equal('function');
         expect(typeof updateable.filter).to.equal('function');

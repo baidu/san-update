@@ -326,7 +326,7 @@ console.log(diff);
 
 其中`oldValue`和`newValue`标记更新前后的值，当`$change`为`"remove"`时`newValue`的值恒定为`undefined`，当`$change`为`"add"`时则`oldValue`的值恒定为`undefined`。因此，为了避免后续对
 
-如果使用`push`、`unshift`、`splice`指令对数组进行了操作，则会在差异对象中生成一个`splice`属性，其中的`index`、`deleteCount`、`insertions`表达了更新的位置、删除的数量、插入的新元素。需要注意的是如果使用`invoke`、`set`等操作对数组进行更新则不会有`splice`属性产生，数组将被当作普通的对象仅提供新旧值。
+如果使用`push`、`unshift`、`splice`、`pop`、`shift`、`removet`、`removeAt`指令对数组进行了操作，则会在差异对象中生成一个`splice`属性，其中的`index`、`deleteCount`、`insertions`表达了更新的位置、删除的数量、插入的新元素。需要注意的是如果使用`invoke`、`set`等操作对数组进行更新则不会有`splice`属性产生，数组将被当作普通的对象仅提供新旧值。
 
 ## 细节
 

@@ -175,6 +175,120 @@ describe('update method', () => {
         expect(() => update(source, {x: {$unshift: 1}})).to.throw(Error);
     });
 
+    it('should recognize pop command', () => {
+        let source = createSourceObject();
+        let [result, diff] = withDiff(source, {foo: {$pop: true}});
+        expect(result.foo).to.deep.equal([1, 2]);
+        expect(source).to.deep.equal(createSourceObject());
+        result.foo = [1, 2, 3];
+        expect(result).to.deep.equal(source);
+        expect(diff).to.deep.equal(diffOfArray('foo', [1, 2, 3], [1, 2], 3, 1, []));
+    });
+
+    it('should accept assertion boolean value on pop command', () => {
+        let [result, diff] = withDiff({x: [1, 2, 3]}, {x: {$pop: false}});
+        expect(result).to.deep.equal({x: [1, 2, 3]});
+        expect(diff).to.deep.equal({});
+    });
+
+    it('should accept assertion function on pop command', () => {
+        let [result, diff] = withDiff({x: [1, 2, 3]}, {x: {$pop: () => false}});
+        expect(result).to.deep.equal({x: [1, 2, 3]});
+        expect(diff).to.deep.equal({});
+    });
+
+    it('should throw running pop command on none array', () => {
+        let source = {x: {}};
+        expect(() => update(source, {x: {$pop: false}})).to.throw(Error);
+    });
+
+    it('should keep array unmodified when running pop command on empty array', () => {
+        let [result, diff] = withDiff({x: []}, {x: {$pop: true}});
+        expect(result).to.deep.equal({x: []});
+        expect(diff).to.deep.equal({});
+    });
+
+    it('should recognize shift command', () => {
+        let source = createSourceObject();
+        let [result, diff] = withDiff(source, {foo: {$shift: true}});
+        expect(result.foo).to.deep.equal([2, 3]);
+        expect(source).to.deep.equal(createSourceObject());
+        result.foo = [1, 2, 3];
+        expect(result).to.deep.equal(source);
+        expect(diff).to.deep.equal(diffOfArray('foo', [1, 2, 3], [2, 3], 3, 1, []));
+    });
+
+    it('should accept assertion boolean value on shift command', () => {
+        let [result, diff] = withDiff({x: [1, 2, 3]}, {x: {$shift: false}});
+        expect(result).to.deep.equal({x: [1, 2, 3]});
+        expect(diff).to.deep.equal({});
+    });
+
+    it('should accept assertion function on shift command', () => {
+        let [result, diff] = withDiff({x: [1, 2, 3]}, {x: {$shift: () => false}});
+        expect(result).to.deep.equal({x: [1, 2, 3]});
+        expect(diff).to.deep.equal({});
+    });
+
+    it('should throw running shift command on none array', () => {
+        let source = {x: {}};
+        expect(() => update(source, {x: {$shift: false}})).to.throw(Error);
+    });
+
+    it('should keep array unmodified when running shift command on empty array', () => {
+        let [result, diff] = withDiff({x: []}, {x: {$shift: true}});
+        expect(result).to.deep.equal({x: []});
+        expect(diff).to.deep.equal({});
+    });
+
+    it('should recognize removeAt command', () => {
+        let source = createSourceObject();
+        let [result, diff] = withDiff(source, {x: {y: {z: {$removeAt: 1}}}});
+        expect(result.x.y.z).to.deep.equal([1, 3]);
+        expect(source).to.deep.equal(createSourceObject());
+        result.x.y.z = [1, 2, 3];
+        expect(result).to.deep.equal(source);
+        expect(diff).to.deep.equal(diffOfArray(['x', 'y', 'z'], [1, 2, 3], [1, 3], 1, 1, []));
+    });
+
+    it('should throw running removeAt command on none array', () => {
+        let source = {x: {}};
+        expect(() => update(source, {x: {$removeAt: 1}})).to.throw(Error);
+    });
+
+    it('should keep array unmodified if removeAt index is negative', () => {
+        let [result, diff] = withDiff({x: [1, 2, 3]}, {x: {$removeAt: -1}});
+        expect(result).to.deep.equal({x: [1, 2, 3]});
+        expect(diff).to.deep.equal({});
+    });
+
+    it('should keep array unmodified if removeAt index is out of range', () => {
+        let [result, diff] = withDiff({x: [1, 2, 3]}, {x: {$removeAt: 4}});
+        expect(result).to.deep.equal({x: [1, 2, 3]});
+        expect(diff).to.deep.equal({});
+    });
+
+    it('should recognize remove command', () => {
+        let source = createSourceObject();
+        let [result, diff] = withDiff(source, {x: {y: {z: {$remove: 1}}}});
+        expect(result.x.y.z).to.deep.equal([2, 3]);
+        expect(source).to.deep.equal(createSourceObject());
+        result.x.y.z = [1, 2, 3];
+        expect(result).to.deep.equal(source);
+        expect(diff).to.deep.equal(diffOfArray(['x', 'y', 'z'], [1, 2, 3], [2, 3], 0, 1, []));
+    });
+
+    it('should throw running remove command on none array', () => {
+        let source = {x: {}};
+        expect(() => update(source, {x: {$remove: 1}})).to.throw(Error);
+    });
+
+    it('should keep array unmodified if removing item is not in the array', () => {
+        let [result, diff] = withDiff({x: [1, 2, 3]}, {x: {$remove: 4}});
+        expect(result).to.deep.equal({x: [1, 2, 3]});
+        expect(diff).to.deep.equal({});
+    });
+
     it('should recognize splice command', () => {
         let source = createSourceObject();
         let [result, diff] = withDiff(source, {x: {y: {z: {$splice: [1, 1, 6, 7, 8]}}}});

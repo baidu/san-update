@@ -24,6 +24,10 @@ describe('macro method', () => {
         expect(typeof builder.merge).to.equal('function');
         expect(typeof builder.push).to.equal('function');
         expect(typeof builder.unshift).to.equal('function');
+        expect(typeof builder.pop).to.equal('function');
+        expect(typeof builder.shift).to.equal('function');
+        expect(typeof builder.removeAt).to.equal('function');
+        expect(typeof builder.remove).to.equal('function');
         expect(typeof builder.splice).to.equal('function');
         expect(typeof builder.map).to.equal('function');
         expect(typeof builder.filter).to.equal('function');
