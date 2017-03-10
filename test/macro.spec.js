@@ -62,10 +62,19 @@ describe('macro method', () => {
         expect(target).to.deep.equal(base);
     });
 
-    it('should correctly build a differ', () => {
+    it('should export a withDiff function attached on the update function', () => {
+        let update = macro()
+            .apply('x', i => i + 1)
+            .build();
+        let [target, diff] = update.withDiff({x: 2});
+        expect(target).to.deep.equal({x: 3});
+        expect(diff).to.deep.equal({x: {$change: 'change', oldValue: 2, newValue: 3}});
+    });
+
+    it('should correctly build a withDiff function', () => {
         let withDiff = macro()
             .apply('x', i => i + 1)
-            .differ();
+            .buildWithDiff();
         let [target, diff] = withDiff({x: 2});
         expect(target).to.deep.equal({x: 3});
         expect(diff).to.deep.equal({x: {$change: 'change', oldValue: 2, newValue: 3}});

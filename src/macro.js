@@ -22,10 +22,12 @@ let createMacro = (commands = EMPTY) => availableCommandNames.reduce(
     },
     {
         build() {
-            return value => update(value, commands);
+            let result = value => update(value, commands);
+            result.withDiff = value => withDiff(value, commands);
+            return result;
         },
 
-        differ() {
+        buildWithDiff() {
             return value => withDiff(value, commands);
         }
     }
