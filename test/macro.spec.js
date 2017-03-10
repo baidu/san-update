@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {macro} from '../src/index';
+import {macro, builder, updateBuilder} from '../src/index';
 
 function createSourceObject() {
     return {
@@ -18,6 +18,11 @@ function createSourceObject() {
 }
 
 describe('macro method', () => {
+    it('should export alias', () => {
+        expect(macro === builder).to.equal(true);
+        expect(macro === updateBuilder).to.equal(true);
+    });
+
     it('should export all update shortcuts', () => {
         let builder = macro();
         expect(typeof builder.set).to.equal('function');

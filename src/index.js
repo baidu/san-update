@@ -14,7 +14,11 @@ export {
     chain as chain,
     chain as immutable
 };
-export {macro};
+export {
+    macro as macro,
+    macro as builder,
+    macro as updateBuilder
+};
 export {
     set,
     push, unshift, splice, map, filter, reduce,

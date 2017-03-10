@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {immutable} from '../src/index';
+import {immutable, chain} from '../src/index';
 
 function createSourceObject() {
     return {
@@ -18,6 +18,10 @@ function createSourceObject() {
 }
 
 describe('chain method', () => {
+    it('should export alias', () => {
+        expect(immutable === chain).to.equal(true);
+    });
+
     it('should export all update shortcuts', () => {
         let updateable = immutable({});
         expect(typeof updateable.set).to.equal('function');
