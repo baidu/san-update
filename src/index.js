@@ -17,9 +17,9 @@ export {
 export {macro};
 export {
     set,
-    push, unshift, splice, map, filter, reduce, slice,
+    push, unshift, splice, map, filter, reduce,
     merge, defaults,
-    invoke,
+    apply,
     omit,
     composeBefore, composeAfter
 } from './shortcut';

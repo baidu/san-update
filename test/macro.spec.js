@@ -32,9 +32,8 @@ describe('macro method', () => {
         expect(typeof builder.map).to.equal('function');
         expect(typeof builder.filter).to.equal('function');
         expect(typeof builder.reduce).to.equal('function');
-        expect(typeof builder.slice).to.equal('function');
         expect(typeof builder.defaults).to.equal('function');
-        expect(typeof builder.invoke).to.equal('function');
+        expect(typeof builder.apply).to.equal('function');
         expect(typeof builder.omit).to.equal('function');
         expect(typeof builder.composeBefore).to.equal('function');
         expect(typeof builder.composeAfter).to.equal('function');
@@ -45,7 +44,7 @@ describe('macro method', () => {
             .set(['x', 'y', 'z'], 3)
             .splice('foo', 1, 2, 4, 5)
             .merge('tom', {tinna: 2})
-            .invoke('bob', i => i + 1)
+            .apply('bob', i => i + 1)
             .build();
         let target = update(createSourceObject());
         let base = {
@@ -60,7 +59,7 @@ describe('macro method', () => {
 
     it('should correctly build a differ', () => {
         let withDiff = macro()
-            .invoke('x', i => i + 1)
+            .apply('x', i => i + 1)
             .differ();
         let [target, diff] = withDiff({x: 2});
         expect(target).to.deep.equal({x: 3});
@@ -78,7 +77,7 @@ describe('macro method', () => {
     it('should accept an initial command', () => {
         let update = macro({foo: {$push: 4}, tom: {$merge: {tinna: 2}}})
             .set(['x', 'y', 'z'], 3)
-            .invoke('bob', i => i + 1)
+            .apply('bob', i => i + 1)
             .build();
         let target = update(createSourceObject());
         let base = {

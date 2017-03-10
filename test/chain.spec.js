@@ -32,9 +32,8 @@ describe('chain method', () => {
         expect(typeof updateable.map).to.equal('function');
         expect(typeof updateable.filter).to.equal('function');
         expect(typeof updateable.reduce).to.equal('function');
-        expect(typeof updateable.slice).to.equal('function');
         expect(typeof updateable.defaults).to.equal('function');
-        expect(typeof updateable.invoke).to.equal('function');
+        expect(typeof updateable.apply).to.equal('function');
         expect(typeof updateable.omit).to.equal('function');
         expect(typeof updateable.composeBefore).to.equal('function');
         expect(typeof updateable.composeAfter).to.equal('function');
@@ -45,7 +44,7 @@ describe('chain method', () => {
             .set(['x', 'y', 'z'], 3)
             .splice('foo', 1, 2, 4, 5)
             .merge('tom', {tinna: 2})
-            .invoke('bob', i => i + 1)
+            .apply('bob', i => i + 1)
             .value();
         let base = {
             x: {y: {z: 3}},
@@ -58,7 +57,7 @@ describe('chain method', () => {
     });
 
     it('should correctly update object with diff', () => {
-        let [target, diff] = immutable({x: 2}).invoke('x', i => i + 1).withDiff();
+        let [target, diff] = immutable({x: 2}).apply('x', i => i + 1).withDiff();
         expect(target).to.deep.equal({x: 3});
         expect(diff).to.deep.equal({x: {$change: 'change', oldValue: 2, newValue: 3}});
     })

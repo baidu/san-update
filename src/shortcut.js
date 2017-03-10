@@ -111,18 +111,6 @@ export let reduce = (source, path, ...args) => {
 };
 
 /**
- * 针对`$slice`指令的快捷函数
- *
- * @param {Object} source 待更新的对象
- * @param {string?|Array.<string>|number?|Array.<number>} path 属性的路径，如果更新二层以上的属性则需要提供一个字符串数组，
- *     如果该参数为'undefined`或`null`，则会直接对`source`对象进行更'操作
- * @param {number} start 起始位置
- * @param {number} end 结束位置
- * @return {Object} 更新后的新对象
- */
-export let slice = (source, path, start, end) => update(source, buildPathObject(path, {$slice: [start, end]}));
-
-/**
  * 针对`$merge`指令的快捷函数
  *
  * @param {Object} source 待更新的对象
@@ -145,7 +133,7 @@ export let merge = (source, path, value) => update(source, buildPathObject(path,
 export let defaults = (source, path, value) => update(source, buildPathObject(path, {$defaults: value}));
 
 /**
- * 针对`$invoke`指令的快捷函数
+ * 针对`$apply`指令的快捷函数
  *
  * @param {Object} source 待更新的对象
  * @param {string?|Array.<string>|number?|Array.<number>} path 属性的路径，如果更新二层以上的属性则需要提供一个字符串数组，
@@ -153,7 +141,7 @@ export let defaults = (source, path, value) => update(source, buildPathObject(pa
  * @param {Function} factory 用于生成新值的工厂函数
  * @return {Object} 更新后的新对象
  */
-export let invoke = (source, path, factory) => update(source, buildPathObject(path, {$invoke: factory}));
+export let apply = (source, path, factory) => update(source, buildPathObject(path, {$apply: factory}));
 
 /**
  * 针对`$omit`指令的快捷函数，其中`assert`参数默认值为`true`

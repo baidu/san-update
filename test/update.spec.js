@@ -8,11 +8,10 @@ import {
     splice,
     map,
     filter,
-    slice,
     reduce,
     merge,
     defaults,
-    invoke,
+    apply,
     omit,
     composeBefore,
     composeAfter
@@ -342,18 +341,6 @@ describe('update method', () => {
         expect(() => update(source, {x: {$reduce: [(sum, value) => sum + value, 0]}})).to.throw(Error);
     });
 
-    it('should recognize slice command', () => {
-        let source = {x: [1, 2, 3]};
-        let [result, diff] = withDiff(source, {x: {$slice: [1, -1]}});
-        expect(result).to.deep.equal({x: [2]});
-        expect(diff).to.deep.equal(diffOfChange('x', [1, 2, 3], [2]));
-    });
-
-    it('should throw running slice command on none array', () => {
-        let source = {x: {}};
-        expect(() => update(source, {x: {$slice: [1, 1]}})).to.throw(Error);
-    });
-
     it('should recognize merge command', () => {
         let source = createSourceObject();
         let [result, diff] = withDiff(source, {x: {y: {$merge: {a: 1, b: 2, z: source.x.y.z}}}});
@@ -387,13 +374,13 @@ describe('update method', () => {
         expect(diff).to.deep.equal({x: {y: Object.assign(diffOfAdd('a', 1), diffOfAdd('b', 2))}});
     });
 
-    it('should recognize invoke command', () => {
+    it('should recognize apply command', () => {
         let source = createSourceObject();
         let [result, diff] = withDiff(
             source,
             {
-                tom: {jack: {$invoke(x) { return x * 2; }}},
-                rabbit: {$invoke() { return 3; }}
+                tom: {jack: {$apply(x) { return x * 2; }}},
+                rabbit: {$apply() { return 3; }}
             }
         );
         expect(result.tom.jack).to.equal(2);
@@ -573,12 +560,6 @@ describe('update method', () => {
         expect(resultSubstract).to.deep.equal({x: 4});
     });
 
-    it('should expose slice function', () => {
-        let source = {x: [1, 2, 3]};
-        let result = slice(source, 'x', 1, -1);
-        expect(result).to.deep.equal({x: [2]});
-    });
-
     it('should expose merge function', () => {
         let source = createSourceObject();
         let result = merge(source, 'x["y"]', {a: 1, b: 2, z: 3});
@@ -593,9 +574,9 @@ describe('update method', () => {
         expect(source).to.deep.equal(createSourceObject());
     });
 
-    it('should expose invoke function', () => {
+    it('should expose apply function', () => {
         let source = createSourceObject();
-        let result = invoke(source, ['tom', 'jack'], x => x * 2);
+        let result = apply(source, ['tom', 'jack'], x => x * 2);
         expect(result.tom.jack).to.equal(2);
         expect(source).to.deep.equal(createSourceObject());
     });
@@ -660,13 +641,6 @@ describe('update method', () => {
             expect(diff).to.deep.equal(diffOfChange(null, [1, 2, 3], 6));
         });
 
-        it('should work with $slice', () => {
-            let source = [1, 2, 3];
-            let [result, diff] = withDiff(source, {$slice: [1, -1]});
-            expect(result).to.deep.equal([2]);
-            expect(diff).to.deep.equal(diffOfChange(null, [1, 2, 3], [2]));
-        });
-
         it('should work with $merge', () => {
             let source = {foo: 1};
             let [result, diff] = withDiff(source, {$merge: {foo: 3, bar: 2}});
@@ -683,9 +657,9 @@ describe('update method', () => {
             expect(diff).to.deep.equal(diffOfAdd('bar', 2));
         });
 
-        it('should work with $invoke', () => {
+        it('should work with $apply', () => {
             let source = 1;
-            let [result, diff] = withDiff(source, {$invoke(x) { return x * 2; }});
+            let [result, diff] = withDiff(source, {$apply(x) { return x * 2; }});
             expect(result).to.equal(2);
             expect(source).to.equal(1);
             expect(diff).to.deep.equal(diffOfChange(null, 1, 2));
@@ -754,9 +728,9 @@ describe('update method', () => {
             expect(source).to.deep.equal({foo: 1});
         });
 
-        it('should work with $invoke', () => {
+        it('should work with $apply', () => {
             let source = 1;
-            let result = invoke(source, null, x => x * 2);
+            let result = apply(source, null, x => x * 2);
             expect(result).to.equal(2);
             expect(source).to.equal(1);
         });

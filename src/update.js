@@ -233,20 +233,6 @@ const AVAILABLE_COMMANDS = {
         ];
     },
 
-    $slice(container, propertyName, [begin, end]) {
-        let array = container[propertyName];
-
-        if (!Array.isArray(array)) {
-            throw new Error('Usage of $slice command on non array object is forbidden.');
-        }
-
-        let newValue = array.slice(begin, end);
-        return [
-            newValue,
-            diffObject('change', array, newValue)
-        ];
-    },
-
     $reduce(container, propertyName, args) {
         let array = container[propertyName];
 
@@ -295,7 +281,7 @@ const AVAILABLE_COMMANDS = {
         return [newValue, diff];
     },
 
-    $invoke(container, propertyName, factory) {
+    $apply(container, propertyName, factory) {
         let newValue = factory(container[propertyName]);
         return [
             newValue,
@@ -370,7 +356,7 @@ export let availableCommandNames = AVAILABLE_COMMAND_KEYS.map(key => key.slice(1
  * - `$unshift`：向类型为数组的属性头部添加元素
  * - `$merge`：将2个对象进行浅合并（不递归）
  * - `$defaults`：将指定对象的属性值填到原属性为'undefined`的'性上
- * - `$invoke`：用一个工厂函数的返回值作为`$set`指令的输入，工厂函数接受属性的旧值作为唯一的参数
+ * - `$apply`：用一个工厂函数的返回值作为`$set`指令的输入，工厂函数接受属性的旧值作为唯一的参数
  * - `$omit`：用于移除某个属性，传递`boolean`值来确认是否移除（`true`为移除），也可传递一个函数（参数为旧值）用其返回值确认是否移除
  *
  * 可以在一次更新操作中对不同的属性用不同的指令：
