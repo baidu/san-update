@@ -7,15 +7,14 @@
  */
 
 import {update} from './update';
+import parseName from './parseName';
 
-function buildPathObject(path, value) {
-    if (path == null) {
+let buildPathObject = (propertyName, value) => {
+    if (propertyName == null) {
         return value;
     }
 
-    if (!Array.isArray(path)) {
-        path = [path];
-    }
+    let path = parseName(propertyName);
 
     let result = {};
     let current = result;
@@ -24,7 +23,7 @@ function buildPathObject(path, value) {
     }
     current[path[path.length - 1]] = value;
     return result;
-}
+};
 
 /**
  * 针对`$set`指令的快捷函数

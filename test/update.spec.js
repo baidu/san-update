@@ -509,10 +509,15 @@ describe('update method', () => {
         expect(result).to.deep.equal(source);
     });
 
+    it('should throw if property path is invalid', () => {
+        expect(() => set({}, 'x[3.y', 1)).to.throw();
+        expect(() => set({}, 'x["y]', 1)).to.throw();
+    });
+
     it('should accept string as property path', () => {
-        let source = {x: 1};
-        let result = set(source, 'x', 2);
-        expect(result).to.deep.equal({x: 2});
+        let source = {x: [1, 2, 3]};
+        let result = set(source, 'x[1]', 4);
+        expect(result).to.deep.equal({x: [1, 4, 3]});
     });
 
     it('should accept number as property path (especially 0)', () => {
@@ -523,7 +528,7 @@ describe('update method', () => {
 
     it('should expose push function', () => {
         let source = createSourceObject();
-        let result = push(source, ['x', 'y', 'z'], 4);
+        let result = push(source, 'x.y.z', 4);
         expect(result.x.y.z).to.deep.equal([1, 2, 3, 4]);
         expect(source).to.deep.equal(createSourceObject());
         result.x.y.z.pop();
@@ -541,7 +546,7 @@ describe('update method', () => {
 
     it('should expose splice function', () => {
         let source = createSourceObject();
-        let result = splice(source, ['x', 'y', 'z'], 1, 1, 6, 7, 8);
+        let result = splice(source, 'x["y"][\'z\']', 1, 1, 6, 7, 8);
         expect(result.x.y.z).to.deep.equal([1, 6, 7, 8, 3]);
         expect(source).to.deep.equal(createSourceObject());
         result.x.y.z = [1, 2, 3];
@@ -550,7 +555,7 @@ describe('update method', () => {
 
     it('should expose map function', () => {
         let source = {x: [1, 2, 3]};
-        let result = map(source, 'x', x => x + 1);
+        let result = map(source, '["x"]', x => x + 1);
         expect(result).to.deep.equal({x: [2, 3, 4]});
     });
 
@@ -576,7 +581,7 @@ describe('update method', () => {
 
     it('should expose merge function', () => {
         let source = createSourceObject();
-        let result = merge(source, ['x', 'y'], {a: 1, b: 2, z: 3});
+        let result = merge(source, 'x["y"]', {a: 1, b: 2, z: 3});
         expect(result.x.y).to.deep.equal({a: 1, b: 2, z: 3});
         expect(source).to.deep.equal(createSourceObject());
     });
