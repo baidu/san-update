@@ -154,6 +154,8 @@ console.log(nameUpdated.value());
 
 ```javascript
 import {immutable} from 'san-update';
+// 也可以使用以下别名，为同一个函数
+// import {chain} from 'san-update';
 
 let source = {
     name: {
@@ -185,17 +187,20 @@ let target = immutable(source)
 
 这并不会给你预期的结果，所以在使用链式调用的时候要注意每个指令的路径。
 
-### 使用macro构建更新函数
+### 使用builder构建更新函数
 
-当一个更新指令会被经常使用时，我们常用的方式是将这个指令保存为一个常量，以避免每一次构建指令的消耗。但是任何对象更新库的指令都是一个不容易理解的底层数据结构，因此为了更方便直观地构建一个可被反复使用的更新对象的函数，`san-update`提供`macro`功能来声明更新的函数。
+当一个更新指令会被经常使用时，我们常用的方式是将这个指令保存为一个常量，以避免每一次构建指令的消耗。但是任何对象更新库的指令都是一个不容易理解的底层数据结构，因此为了更方便直观地构建一个可被反复使用的更新对象的函数，`san-update`提供`builder`功能来声明更新的函数。
 
-`macro`的使用方式和链式调用相似，区别在于构造时不需要传入待更新的对象，而其最终返回的函数则是一个接收待更新对象的函数。
+`builder`的使用方式和链式调用相似，区别在于构造时不需要传入待更新的对象，而其最终返回的函数则是一个接收待更新对象的函数。
 
 ```javascript
-import {macro} from 'san-update';
+import {builder} from 'san-update';
+// 也可以使用以下别名，均为同一个函数
+// import {macro} from 'san-update';
+// import {updateBuilder} from 'san-update';
 
 // 构建一个用于升级当前角色的函数
-let levelUp = macro()
+let levelUp = builder()
     .invoke('level', level => level + 1)
     .invoke('hp', hp => Math.round(hp * 1.19)) // 增加19%的HP
     .invoke('str', str => str + 2)) // 增加2点力量
@@ -251,26 +256,48 @@ console.log(hero);
 // }
 ```
 
-当然，如果从最初就有已经构造完成的更新指令，则可以在调用`macro()`方法时作为参数传递，上面的`levelUp`函数相当于：
+`builder#build`返回的更新函数上还附有`withDiff`函数，可以使用该函数生成差异对象。除此之外，也可以使用`builder#buildWithDiff`直接返回带有差异功能的更新函数。
 
 ```javascript
-import {macro} from 'san-update';
+import {builder} from 'san-update';
+// 也可以使用以下别名，均为同一个函数
+// import {macro} from 'san-update';
+// import {updateBuilder} from 'san-update';
 
-let command = {
-    level: {$invoke(level) { return level + 1; }},
-    hp: {$invoke(hp) { return Math.round(hp * 1.19); }},
-    str: {$invoke(str) { return str + 2; }},
-    int: {$invoke(int) { return int + 1; }},
-    agi: {$invoke(agi) { return agi + 5; }},
-    bag: {
-        capacity: {$invoke(capacity) { return capacity + 2; }}
-    },
-    debuff: {$set: []}
+let source = {
+    name: {
+        firstName: 'Navy',
+        lastName: 'Wong'
+    }
 };
-let levelUp = macro(command);
+
+let update = builder().set('name.firstName', 'Petty').build();
+let target = update.withDiff(source);
+// 也可以这么写：
+// let withDiff = builder().set('name.firstName', 'Petty').buildWithDiff();
+// let target = withDiff(source);
+
+console.log(target);
+// {
+//     name: {
+//         firstName: 'Petty',
+//         lastName: 'Wong'
+//     }
+// }
+
+console.log(diff);
+// {
+//     name: {
+//         firstName: {
+//             $change: 'change',
+//             oldValue: 'Navy',
+//             newValue: 'Petty'
+//         }
+//     }
+// }
 ```
 
-与链式调用相同，`macro`的每一个操作都会生成一个全新的对象，原有的对象不会受到影响。
+与链式调用相同，`builder`的每一个操作都会生成一个全新的对象，原有的对象不会受到影响。
 
 ### 差异获取
 
@@ -389,11 +416,31 @@ open doc/api/index.html
 
 ## 更新历史
 
-### 1.0.0
+### 2.0.0-rc.1
 
-- 从[diffy-update](https://github.com/ecomfe/diffy-update)迁移代码
-- 移除`withDiff`及其相关功能
-- 构建入口模块
+- 添加`withDiff`函数提供计算对象差异的功能
+- 添加`$pop`、`$shift`、`$remove`、`$removeAt`指令
+- 允许使用诸如`"foo.bar[2]"`的字符串表达属性的访问路径
+- 为`macro`添加别名`builder`和`updateBuilder`
+- **[BREAKING]**移除`$slice`指令
+- **[BREAKING]**`$invoke`指令更名为`$apply`
+
+### 1.4.0
+
+- 添加`$map`、`$filter`、`$reduce`、`$slice`、`$composeBefore`、`$composeAfter`指令
+
+### 1.3.0
+
+- 在非数组上调用`$push`、`$unshift`、`$splice`指令将抛出异常
+- 修复了`$merge`指令在原属性存在和不存在时的行为差异
+
+### 1.2.0
+
+- 添加`macro`功能用于构建更新函数
+
+### 1.1.1
+
+- 修复`omit`快捷函数未导出的BUG
 
 ### 1.1.0
 
@@ -401,19 +448,8 @@ open doc/api/index.html
 - 修复内部`clone`函数不会复制原型属性的错误
 - 添加了`omit`指令
 
-### 1.1.1
+### 1.0.0
 
-- 修复`omit`快捷函数未导出的BUG
-
-### 1.2.0
-
-- 添加`macro`功能用于构建更新函数。
-
-### 1.3.0
-
-- 在非数组上调用`$push`、`$unshift`、`$splice`指令将抛出异常
-- 修复了`$merge`指令在原属性存在和不存在时的行为差异
-
-### 1.4.0
-
-- 添加`$map`、`$filter`、`$reduce`、`$slice`、`$composeBefore`、`$composeAfter`指令
+- 从[diffy-update](https://github.com/ecomfe/diffy-update)迁移代码
+- 移除`withDiff`及其相关功能
+- 构建入口模块
