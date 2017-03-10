@@ -87,20 +87,4 @@ describe('macro method', () => {
         let target = updateFoo.build()(source);
         expect(target.bob).to.equal(2);
     });
-
-    it('should accept an initial command', () => {
-        let update = macro({foo: {$push: 4}, tom: {$merge: {tinna: 2}}})
-            .set(['x', 'y', 'z'], 3)
-            .apply('bob', i => i + 1)
-            .build();
-        let target = update(createSourceObject());
-        let base = {
-            x: {y: {z: 3}},
-            foo: [1, 2, 3, 4],
-            alice: 1,
-            bob: 3,
-            tom: {jack: 1, tinna: 2}
-        };
-        expect(target).to.deep.equal(base);
-    });
 });
