@@ -87,6 +87,462 @@ console.log(target);
 
 除此之外，本库还提供了一系列快捷函数，如`set`、`push`、`unshift`、`merge`、`defaults`等，这些函数可用于快速更新对象的某个属性，可以通过API文档进行查阅
 
+### 可用指令
+
+以下指令可以在`update`方法中使用，同时也有同名的对应快捷方式函数
+
+#### $set
+
+用于将属性的值设置为提供的新值
+
+```javascript
+import {update, set} from 'san-update';
+
+let source = {
+    value: 1
+};
+
+update(source, {value: {$set: 2}});
+set(source, 'value', 2);
+// {
+//     value: 2
+// }
+```
+
+#### $push
+
+用于在类型为数组的属性末尾增加一个元素，如果属性的类型不是数组，则会抛出异常
+
+```javascript
+import {update, push} from 'san-update';
+
+let source = {
+    count: 1,
+    values: [1, 2]
+};
+
+update(source, {values: {$push: 3}});
+push(source, 'values', 3);
+// {
+//     count: 1,
+//     values: [1, 2, 3]
+// }
+
+update(source, {count: {$push: 2}});
+push(source, 'count', 2);
+// Error: Usage of $push command on non array object is forbidden.
+```
+
+#### $unshift
+
+用于在类型为数组的属性头部增加一个元素，如果属性的类型不是数组，则会抛出异常
+
+```javascript
+import {update, unshift} from 'san-update';
+
+let source = {
+    count: 1,
+    values: [1, 2]
+};
+
+update(source, {values: {$unshift: 0}});
+unshift(source, 'values', 0);
+// {
+//     count: 1,
+//     values: [0, 1, 2]
+// }
+
+update(source, {count: {$unshift: 0}});
+unshift(source, 'count', 0);
+// Error: Usage of $unshift command on non array object is forbidden.
+```
+
+#### $pop
+
+用于移除类型为数组的属性的最后一个元素，如果属性的类型不是数组，则会抛出异常
+
+`$pop`指令对应的值可以为一个`boolean`类型的值，当其值为`true`时会执行移除操作，值为`false`时则不进行更新。同时值也可以为一个函数，该函数接受属性当前的值并返回一个`boolean`类型的值用于判断是否进行更新
+
+```javascript
+import {update, pop} from 'san-update';
+
+let source = {
+    count: 1,
+    values: [1, 2]
+};
+
+update(source, {values: {$pop: true}});
+// {
+//     count: 1,
+//     values: [1]
+// }
+pop(source, 'values', array => array.length > 2);
+// 因函数执行返回为false，对象不会更新
+// {
+//     count: 1,
+//     values: [1, 2]
+// }
+
+// 无论值为true还是false，类型检查都会进行
+update(source, {count: {$pop: true}});
+pop(source, 'count', false);
+// Error: Usage of $pop command on non array object is forbidden.
+```
+
+#### $shift
+
+用于移除类型为数组的属性的第一个元素，如果属性的类型不是数组，则会抛出异常
+
+`$shift`指令对应的值可以为一个`boolean`类型的值，当其值为`true`时会执行移除操作，值为`false`时则不进行更新。同时值也可以为一个函数，该函数接受属性当前的值并返回一个`boolean`类型的值用于判断是否进行更新
+
+```javascript
+import {update, shift} from 'san-update';
+
+let source = {
+    count: 1,
+    values: [1, 2]
+};
+
+update(source, {values: {$shift: true}});
+// {
+//     count: 1,
+//     values: [2]
+// }
+shift(source, 'values', array => array.length > 2);
+// 因函数执行返回为false，对象不会更新
+// {
+//     count: 1,
+//     values: [1, 2]
+// }
+
+// 无论值为true还是false，类型检查都会进行
+update(source, {count: {$shift: true}});
+shift(source, 'count', false);
+// Error: Usage of $shift command on non array object is forbidden.
+```
+
+#### $removeAt
+
+用于移除类型为数组的属性中指定位置的元素，如果属性的类型不是数组，则会抛出异常
+
+如果提供的索引在数组范围之外（值为负或超出数组长度），则不会进行更新
+
+```javascript
+import {update, removeAt} from 'san-update';
+
+let source = {
+    count: 1,
+    values: [1, 2]
+};
+
+update(source, {values: {$removeAt: 1}});
+// {
+//     count: 1,
+//     values: [1]
+// }
+removeAt(source, 'values', 2);
+// 因超出范围，不会进行更新
+// {
+//     count: 1,
+//     values: [1, 2]
+// }
+
+update(source, {count: {$removeAt: 1}});
+removeAt(source, 'count', 1);
+// Error: Usage of $removeAt command on non array object is forbidden.
+```
+
+#### $remove
+
+用于移除类型为数组的属性中的指定元素，如果属性的类型不是数组，则会抛出异常
+
+如果数组中出现多次指定的元素，则**只会移除第一个**，如果未找到元素，则不进行更新
+
+```javascript
+import {update, remove} from 'san-update';
+
+let source = {
+    count: 1,
+    values: [1, 2]
+};
+
+update(source, {values: {$remove: 1}});
+// {
+//     count: 1,
+//     values: [2]
+// }
+remove(source, 'values', 3);
+// 未找到元素则不进行更新
+// {
+//     count: 1,
+//     values: [1, 2]
+// }
+
+update(source, {count: {$remove: 1}});
+remove(source, 'count', 1);
+// Error: Usage of $remove command on non array object is forbidden.
+```
+
+#### $splice
+
+用于对类型为数组的属性进行splice操作，如果属性的类型不是数组，则会抛出异常
+
+`$splice`指令接收的值为一个数组，其内容与`Array#splice`方法相同，分别为`[start, deleteCount, ...items]`
+
+```javascript
+import {update, splice} from 'san-update';
+
+let source = {
+    count: 1,
+    values: [1, 2]
+};
+
+update(source, {values: {$splice: [1, 1, 3, 4, 5]}});
+// {
+//     count: 1,
+//     values: [1, 3, 4, 5]
+// }
+splice(source, 'values', [1, 0, 3, 4, 5]);
+// {
+//     count: 1,
+//     values: [1, 3, 4, 5, 2]
+// }
+
+update(source, {count: {$splice: [1, 0, 2]}});
+splice(source, 'count', [1, 0, 2]);
+// Error: Usage of $splice command on non array object is forbidden.
+```
+
+#### $map
+
+用于对类型为数组的属性进行map操作，如果属性的类型不是数组，则会抛出异常
+
+```javascript
+import {update, map} from 'san-update';
+
+let source = {
+    count: 1,
+    values: [1, 2]
+};
+
+update(source, {values: {$map: value => value + 1}});
+map(source, 'values', value => value + 1);
+// {
+//     count: 1,
+//     values: [2, 3]
+// }
+
+update(source, {count: {$map: value => value + 1}});
+map(source, 'count', value => value + 1);
+// Error: Usage of $map command on non array object is forbidden.
+```
+
+#### $filter
+
+用于对类型为数组的属性进行filter操作，如果属性的类型不是数组，则会抛出异常
+
+```javascript
+import {update, filter} from 'san-update';
+
+let source = {
+    count: 1,
+    values: [1, 2]
+};
+
+update(source, {values: {$filter: value => value > 1}});
+filter(source, 'values', value => value > 1);
+// {
+//     count: 1,
+//     values: [2]
+// }
+
+update(source, {count: {$filter: value => value > 1}});
+filter(source, 'count', value => value > 1);
+// Error: Usage of $filter command on non array object is forbidden.
+```
+
+#### $reduce
+
+用于对类型为数组的属性进行reduce操作，如果属性的类型不是数组，则会抛出异常
+
+```javascript
+import {update, reduce} from 'san-update';
+
+let source = {
+    count: 1,
+    values: [1, 2]
+};
+
+update(source, {values: {$reduce: [(sum, value) => sum + value, 0]}});
+// 也支持没有initialValue
+reduce(source, 'values', (sum, value) => sum + value);
+// {
+//     count: 1,
+//     values: 3
+// }
+
+update(source, {count: {$reduce: (sum, value) => sum + value}});
+reduce(source, 'count', (sum, value) => sum + value);
+// Error: Usage of $reduce command on non array object is forbidden.
+```
+
+#### $merge
+
+用于在属性中合并相就的键值，`$merge`指令使用浅合并
+
+```javascript
+import {update, merge} from 'san-update';
+
+let source = {
+    user: {
+        name: 'Alice'
+    }
+};
+
+update(source, {user: {$merge: {name: 'Bob', age: 14}}});
+merge(source, 'user', {name: 'Bob', age: 14});
+// {
+//     user: {
+//         name: 'Bob',
+//         age: 14
+//     }
+// }
+```
+
+#### $defaults
+
+用于在向属性中不存在的键填充值，`$defaults`指令使用浅合并
+
+```javascript
+import {update, defaults} from 'san-update';
+
+let source = {
+    user: {
+        name: 'Alice'
+    }
+};
+
+update(source, {user: {$defaults: {name: 'Bob', age: 14}}});
+defaults(source, 'user', {name: 'Bob', age: 14});
+// {
+//     user: {
+//         name: 'Alice',
+//         age: 14
+//     }
+// }
+```
+
+#### $apply
+
+用于通过一个函数对属性的值进行更新，提供的函数接收属性当前值作为唯一的参数，其返回值作为属性的新值
+
+```javascript
+import {update, apply} from 'san-update';
+
+let source = {
+    value: 1
+};
+
+update(source, {value: {$apply: value => value + 1}});
+apply(source, 'value', value => value + 1);
+// {
+//     user: {
+//         value: 2
+//     }
+// }
+```
+
+#### $omit
+
+用于移除一个属性
+
+`$omit`指令对应的值可以为一个`boolean`类型的值，当其值为`true`时会执行移除操作，值为`false`时则不进行更新。同时值也可以为一个函数，该函数接受属性当前的值并返回一个`boolean`类型的值用于判断是否进行更新
+
+```javascript
+import {update, omit} from 'san-update';
+
+let source = {
+    value: 1
+};
+
+update(source, {value: {$omit: true}});
+// {}
+omit(source, 'value', value => value > 1);
+// 因为函数返回false，不会进行更新
+// {
+//     value: 1
+// }
+```
+
+#### $composeBefore
+
+用于更新类型为函数的属性，将该函数进行封装，封装后的函数先执行`$composeBefore`指令接收的函数，后续使用该函数返回的值作为参数执行原函数。如果属性的类型不是函数，则会抛出异常
+
+```javascript
+import {update, composeBefore} from 'san-update';
+
+let source = {
+    name: 'app',
+    log(text) {
+        console.log(text);
+    }
+};
+let prefix = module => text => {
+    console.log(`[${module}]`);
+    return '    ' + text;
+};
+
+let sysLogger = update(source, {log: {$composeBefore: prefix('System')}});
+sysLogger.log('Hello World');
+// [System]
+//     Hello World
+let appLogger = composeBefore(source, 'log', prefix('Application'));
+appLogger.log('Hello World');
+// [Application]
+//     Hello World
+
+update(source, {name: {$composeBefore: prefix('System')}});
+composeBefore(source, 'name', prefix('System'));
+// Error: Usage of $composeBefore command on non function object is forbidden.
+```
+
+#### $composeAfter
+
+用于更新类型为函数的属性，将该函数进行封装，封装后的函数先执行原函数，后续使用原函数返回值作为参数执行`$composeAfter`指令接收的函数。如果属性的类型不是函数，则会抛出异常
+
+```javascript
+import {update, composeAfter} from 'san-update';
+
+let source = {
+    name: 'app',
+    log(text) {
+        console.log(text);
+    }
+};
+let time = dateOnly => {
+    let now = new Date();
+    if (dateOnly) {
+        console.log(`    @${now.toLocaleDateString()}`);
+    }
+    else {
+        console.log(`    @${now.toLocaleString()}`);
+    }
+};
+
+let longTimeLogger = update(source, {log: {$composeAfter: time(false)}});
+longTimeLogger.log('Hello World');
+// Hello World
+//     @2017/3/17 下午4:35:14
+let shortTimeLogger = composeBefore(source, 'log', time(true));
+shortTimeLogger.log('Hello World');
+// Hello World
+//     @2017/3/17
+
+update(source, {name: {$composeAfter: time(true)}});
+composeAfter(source, 'name',time(true));
+// Error: Usage of $composeAfter command on non function object is forbidden.
+```
+
 ### 链式调用
 
 `chain`模块提供了链式更新一个对象的方法，可以使用`chain`或者`immutable`来引入这一函数，使用方法如下：
@@ -103,7 +559,7 @@ let source = {
     children: ['Alice', 'Bob']
 };
 let target = immutable(source)
-    .set(['name', 'firstName'], 'Petty')
+    .set('name.firstName', 'Petty')
     .set('age', 21)
     .push('children', 'Cary')
     .value();
@@ -134,7 +590,7 @@ let source = {
 };
 let updateable = immutable(source);
 
-let nameUpdated = updateable.set(['name', 'firstName'], 'Petty');
+let nameUpdated = updateable.set('name.firstName', 'Petty');
 let ageUpdated = nameUpdated.set('age', 21);
 
 console.log(nameUpdated.value());
@@ -204,9 +660,9 @@ let levelUp = builder()
     .invoke('level', level => level + 1)
     .invoke('hp', hp => Math.round(hp * 1.19)) // 增加19%的HP
     .invoke('str', str => str + 2)) // 增加2点力量
-    .invoke('int', int => int + 1)) // 增加1点智力
+    .invoke('int', int => int + 1)) / 增加1点智力
     .invoke('agi', agi => agi + 5)) // 增加5点敏捷
-    .invoke(['bag', 'capacity'], capacity => capacity + 2) // 背包增加2格空间
+    .invoke('bag.capacity', capacity => capacity + 2) // 背包增加2格空间
     .set('debuff', []) // 清除所有负面状态
     .build(); // 最终生成更新的函数
 
@@ -387,7 +843,7 @@ let bar = set(foo, 'x', 1);
 import {set} from 'san-update';
 
 let foo = {};
-let bar = set(foo, ['x', 'y'], 1);
+let bar = set(foo, 'x.y', 1);
 ```
 
 如上代码，`foo`对象并没有`x`属性，此时对`x.y`进行修改会在路径访问上出现一个空缺。

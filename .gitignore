@@ -9,3 +9,4 @@ map
 .DS_Store
 coverage
 .nyc_output
+.vscode
