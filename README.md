@@ -657,12 +657,12 @@ import {builder} from 'san-update';
 
 // 构建一个用于升级当前角色的函数
 let levelUp = builder()
-    .invoke('level', level => level + 1)
-    .invoke('hp', hp => Math.round(hp * 1.19)) // 增加19%的HP
-    .invoke('str', str => str + 2)) // 增加2点力量
-    .invoke('int', int => int + 1)) / 增加1点智力
-    .invoke('agi', agi => agi + 5)) // 增加5点敏捷
-    .invoke('bag.capacity', capacity => capacity + 2) // 背包增加2格空间
+    .apply('level', level => level + 1)
+    .apply('hp', hp => Math.round(hp * 1.19)) // 增加19%的HP
+    .apply('str', str => str + 2)) // 增加2点力量
+    .apply('int', int => int + 1)) / 增加1点智力
+    .apply('agi', agi => agi + 5)) // 增加5点敏捷
+    .apply('bag.capacity', capacity => capacity + 2) // 背包增加2格空间
     .set('debuff', []) // 清除所有负面状态
     .build(); // 最终生成更新的函数
 
@@ -809,7 +809,7 @@ console.log(diff);
 
 其中`oldValue`和`newValue`标记更新前后的值，当`$change`为`"remove"`时`newValue`的值恒定为`undefined`，当`$change`为`"add"`时则`oldValue`的值恒定为`undefined`。因此，为了避免后续对
 
-如果使用`push`、`unshift`、`splice`、`pop`、`shift`、`removet`、`removeAt`指令对数组进行了操作，则会在差异对象中生成一个`splice`属性，其中的`index`、`deleteCount`、`insertions`表达了更新的位置、删除的数量、插入的新元素。需要注意的是如果使用`invoke`、`set`等操作对数组进行更新则不会有`splice`属性产生，数组将被当作普通的对象仅提供新旧值。
+如果使用`push`、`unshift`、`splice`、`pop`、`shift`、`removet`、`removeAt`指令对数组进行了操作，则会在差异对象中生成一个`splice`属性，其中的`index`、`deleteCount`、`insertions`表达了更新的位置、删除的数量、插入的新元素。需要注意的是如果使用`apply`、`set`等操作对数组进行更新则不会有`splice`属性产生，数组将被当作普通的对象仅提供新旧值。
 
 ## 细节
 
@@ -871,6 +871,12 @@ open doc/api/index.html
 ```
 
 ## 更新历史
+
+### 2.0.0
+
+本版本源码与2.0.0-rc.1一到
+
+- 修复相关文档内容
 
 ### 2.0.0-rc.1
 
