@@ -6,7 +6,8 @@
  * @author otakustay
  */
 
-import {update, withDiff, availableCommandNames} from './update';
+import {update, withDiff} from './update';
+import {availableCommandNames} from './command';
 import {merge} from './shortcut';
 
 let createMacro = commands => availableCommandNames.reduce(

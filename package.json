@@ -7,6 +7,7 @@
     "test": "cross-env NODE_ENV=test mocha",
     "test-cov": "npm run lint && cross-env NODE_ENV=test nyc --reporter=text --reporter=lcov --reporter=html mocha",
     "report-cov": "cat coverage/lcov.info | coveralls",
+    "ci": "npm run test-cov && npm run compile",
     "lint": "fecs",
     "doc": "esdoc -c esdoc.json",
     "compile": "gulp",
