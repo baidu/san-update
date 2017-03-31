@@ -956,6 +956,12 @@ open doc/api/index.html
 
 ## 更新历史
 
+### 2.1.0
+
+- 快捷方式增加了`pop`、`shift`、`removeAt`、`remove`函数
+- 增加`applyWith`快捷函数
+- 增加了函数式编程`fp`模块
+
 ### 2.0.0
 
 本版本源码与2.0.0-rc.1一到
