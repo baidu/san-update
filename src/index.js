@@ -25,5 +25,6 @@ export {
     merge, defaults,
     apply,
     omit,
-    composeBefore, composeAfter
+    composeBefore, composeAfter,
+    applyWith
 } from './shortcut';

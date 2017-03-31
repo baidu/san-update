@@ -87,6 +87,43 @@ console.log(target);
 
 除此之外，本库还提供了一系列快捷函数，如`set`、`push`、`unshift`、`merge`、`defaults`等，这些函数可用于快速更新对象的某个属性，可以通过API文档进行查阅
 
+#### applyWith
+
+除与`update`能接受的指令相同的快捷函数之外，还提供一个`applyWith`函数，该函数的声明如下：
+
+```javascript
+{Object} applyWith(
+    {Object} source,
+    {string?|Array.<string>|number?|Array.<number>} path,
+    {Function|Array.<Function>} selectors,
+    {Function} factory
+)
+```
+
+这个函数与`apply`功能类似，区别是可以通过`selectors`属性指定一个或多个选择器，每个选择器接收`source`对象并返回一个值，这些值将作为`factory`函数的前n个参数，并加上需要更新的属性的当前值作为最后一个参数调用`factory`函数，将函数返回值作为属性的新值
+
+```javascript
+let data = {
+    values: [1, 2, 3],
+    multiple: 3,
+    result: 10
+};
+let newData = applyWith(
+    data, // input
+    'result', // path
+    [o => o.values, o => o.multiple], // dependencies
+    (values, multiple, result) => values.reduce((sum, i) => sum + 1) * multiple + result
+);
+console.log(newData);
+// {
+//     values: [1, 2, 3],
+//     multiple: 3,
+//     result: 28 <-- (1 + 2 + 3) * 3 + 10
+// }
+```
+
+需要注意的是，`applyWith`函数仅通过快捷方式提供，在`update`、`macro`和`chain`模块上均没有该功能。
+
 ### 可用指令
 
 以下指令可以在`update`方法中使用，同时也有同名的对应快捷方式函数
