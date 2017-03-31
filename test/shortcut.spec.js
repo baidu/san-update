@@ -3,6 +3,10 @@ import {
     set,
     push,
     unshift,
+    pop,
+    shift,
+    removeAt,
+    remove,
     splice,
     map,
     filter,
@@ -74,6 +78,42 @@ describe('shortcut functions', () => {
         expect(result.x.y.z).to.deep.equal([0, 1, 2, 3]);
         expect(source).to.deep.equal(createSourceObject());
         result.x.y.z.shift();
+        expect(result).to.deep.equal(source);
+    });
+
+    it('should expose pop function', () => {
+        let source = createSourceObject();
+        let result = pop(source, ['x', 'y', 'z'], true);
+        expect(result.x.y.z).to.deep.equal([1, 2]);
+        expect(source).to.deep.equal(createSourceObject());
+        result.x.y.z.push(3);
+        expect(result).to.deep.equal(source);
+    });
+
+    it('should expose shift function', () => {
+        let source = createSourceObject();
+        let result = shift(source, ['x', 'y', 'z'], true);
+        expect(result.x.y.z).to.deep.equal([2, 3]);
+        expect(source).to.deep.equal(createSourceObject());
+        result.x.y.z.unshift(1);
+        expect(result).to.deep.equal(source);
+    });
+
+    it('should expose removeAt function', () => {
+        let source = createSourceObject();
+        let result = removeAt(source, ['x', 'y', 'z'], 1);
+        expect(result.x.y.z).to.deep.equal([1, 3]);
+        expect(source).to.deep.equal(createSourceObject());
+        result.x.y.z.splice(1, 0, 2);
+        expect(result).to.deep.equal(source);
+    });
+
+    it('should expose remove function', () => {
+        let source = createSourceObject();
+        let result = remove(source, ['x', 'y', 'z'], 1);
+        expect(result.x.y.z).to.deep.equal([2, 3]);
+        expect(source).to.deep.equal(createSourceObject());
+        result.x.y.z.unshift(1);
         expect(result).to.deep.equal(source);
     });
 
@@ -166,49 +206,77 @@ describe('shortcut functions', () => {
     });
 
     describe('run with first level command', () => {
-        it('should work with $set', () => {
+        it('should work with set', () => {
             let source = {};
             let result = set(source, null, 1);
             expect(result).to.equal(1);
             expect(source).to.deep.equal({});
         });
 
-        it('should work with $push', () => {
+        it('should work with push', () => {
             let source = [1, 2, 3];
             let result = push(source, null, 4);
             expect(result).to.deep.equal([1, 2, 3, 4]);
             expect(source).to.deep.equal([1, 2, 3]);
         });
 
-        it('should work with $unshift', () => {
+        it('should work with unshift', () => {
             let source = [1, 2, 3];
             let result = unshift(source, null, 0);
             expect(result).to.deep.equal([0, 1, 2, 3]);
             expect(source).to.deep.equal([1, 2, 3]);
         });
 
-        it('should work with $merge', () => {
+        it('should work with pop', () => {
+            let source = [1, 2, 3];
+            let result = pop(source, null, true);
+            expect(result).to.deep.equal([1, 2]);
+            expect(source).to.deep.equal([1, 2, 3]);
+        });
+
+        it('should work with shift', () => {
+            let source = [1, 2, 3];
+            let result = shift(source, null, array => array.length > 2);
+            expect(result).to.deep.equal([2, 3]);
+            expect(source).to.deep.equal([1, 2, 3]);
+        });
+
+        it('should work with removeAt', () => {
+            let source = [1, 2, 3];
+            let result = removeAt(source, null, 1);
+            expect(result).to.deep.equal([1, 3]);
+            expect(source).to.deep.equal([1, 2, 3]);
+        });
+
+        it('should work with remove', () => {
+            let source = [1, 2, 3];
+            let result = remove(source, null, 2);
+            expect(result).to.deep.equal([1, 3]);
+            expect(source).to.deep.equal([1, 2, 3]);
+        });
+
+        it('should work with merge', () => {
             let source = {foo: 1};
             let result = merge(source, null, {bar: 2});
             expect(result).to.deep.equal({foo: 1, bar: 2});
             expect(source).to.deep.equal({foo: 1});
         });
 
-        it('should work with $defaults', () => {
+        it('should work with defaults', () => {
             let source = {foo: 1};
             let result = defaults(source, null, {foo: 2, bar: 2});
             expect(result).to.deep.equal({foo: 1, bar: 2});
             expect(source).to.deep.equal({foo: 1});
         });
 
-        it('should work with $apply', () => {
+        it('should work with apply', () => {
             let source = 1;
             let result = apply(source, null, x => x * 2);
             expect(result).to.equal(2);
             expect(source).to.equal(1);
         });
 
-        it('should work with $composeBefore', () => {
+        it('should work with composeBefore', () => {
             let cache = []
             let raw = value => cache.push(value);
             let before = value => {
@@ -220,7 +288,7 @@ describe('shortcut functions', () => {
             expect(cache).to.deep.equal([1, 2]);
         });
 
-        it('should work with $composeAfter', () => {
+        it('should work with composeAfter', () => {
             let cache = []
             let raw = value => {
                 cache.push(value);

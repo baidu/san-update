@@ -21,7 +21,8 @@ export {
 };
 export {
     set,
-    push, unshift, splice, map, filter, reduce,
+    push, unshift, pop, shift, removeAt, remove, splice,
+    map, filter, reduce,
     merge, defaults,
     apply,
     omit,

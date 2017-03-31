@@ -59,6 +59,50 @@ export let push = (source, path, value) => update(source, buildPathObject(path, 
 export let unshift = (source, path, value) => update(source, buildPathObject(path, {$unshift: value}));
 
 /**
+ * 针对`$pop`指令的快捷函数
+ *
+ * @param {Object} source 待更新的对象
+ * @param {string?|Array.<string>|number?|Array.<number>} path 属性的路径，如果更新二层以上的属性则需要提供一个字符串数组，
+ *     如果该参数为'undefined`或`null`，则会直接对`source`对象进行更'操作
+ * @param {boolean|Function} assert 用于确认是否要移除属性的判断条件或函数
+ * @return {Object} 更新后的新对象
+ */
+export let pop = (source, path, assert) => update(source, buildPathObject(path, {$pop: assert}));
+
+/**
+ * 针对`$shift`指令的快捷函数
+ *
+ * @param {Object} source 待更新的对象
+ * @param {string?|Array.<string>|number?|Array.<number>} path 属性的路径，如果更新二层以上的属性则需要提供一个字符串数组，
+ *     如果该参数为'undefined`或`null`，则会直接对`source`对象进行更'操作
+ * @param {boolean|Function} assert 用于确认是否要移除属性的判断条件或函数
+ * @return {Object} 更新后的新对象
+ */
+export let shift = (source, path, assert) => update(source, buildPathObject(path, {$shift: assert}));
+
+/**
+ * 针对`$removeAt`指令的快捷函数
+ *
+ * @param {Object} source 待更新的对象
+ * @param {string?|Array.<string>|number?|Array.<number>} path 属性的路径，如果更新二层以上的属性则需要提供一个字符串数组，
+ *     如果该参数为'undefined`或`null`，则会直接对`source`对象进行更'操作
+ * @param {number} index 需要删除的索引
+ * @return {Object} 更新后的新对象
+ */
+export let removeAt = (source, path, index) => update(source, buildPathObject(path, {$removeAt: index}));
+
+/**
+ * 针对`$remove`指令的快捷函数
+ *
+ * @param {Object} source 待更新的对象
+ * @param {string?|Array.<string>|number?|Array.<number>} path 属性的路径，如果更新二层以上的属性则需要提供一个字符串数组，
+ *     如果该参数为'undefined`或`null`，则会直接对`source`对象进行更'操作
+ * @param {*} value 需要删除的值
+ * @return {Object} 更新后的新对象
+ */
+export let remove = (source, path, value) => update(source, buildPathObject(path, {$remove: value}));
+
+/**
  * 针对`$splice`指令的快捷函数
  *
  * @param {Object} source 待更新的对象
