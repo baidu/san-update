@@ -790,7 +790,54 @@ console.log(diff);
 // }
 ```
 
-与链式调用相同，`builder`的每一个操作都会生成一个全新的对象，原有的对象不会受到影响。
+与链式调用相同，`builder`的每一个操作都会生成一个全新的对象，原有的对象不会受到影响
+
+### 函数式编程
+
+`san-update/fp`模块提供了与快捷方式同名的一系列函数，这些函数与快捷方式不同的是不接收`source`参数，而是先使用其它参数生成一个更新用的函数，随后再调用该函数提供`source`参数来获得更新后的对象。这些函数可以很方便地用于函数式编程：
+
+```javascript
+import {set} from 'san-update/fp';
+
+let setName = set('name', 'Gray Zhang');
+let user = {
+    name: 'Gary Wang'
+};
+let newUser = setName(user);
+console.log(newUser);
+// {
+//     name: 'Gray Zhang'
+// }
+```
+
+上面的代码等效于以下直接使用快捷函数的代码，区别在于`setName`可以被多次复用：
+
+```javascript
+import {set} from 'san-update';
+
+let user = {
+    name: 'Gary Wang'
+};
+let newUser = set(user, 'name', 'Gray Zhang');
+console.log(newUser);
+// {
+//     name: 'Gray Zhang'
+// }
+```
+
+使用`flow`或者`compose`等函数组合的功能可以非常方便地构建出一个完整表达业务逻辑的更新函数：
+
+```javascript
+import {set, apply, push} from 'san-update/fp';
+import {flow} from 'lodash'; // 使用lodash.flow组合多个函数
+
+let setRole = set('role', 'Skilled Warrior');
+let increaseLevel = apply('level', level => level + 1);
+let addBattleSkill = push('skills.battle', 'Bloody Massacre');
+let levelUpToTen = flow(setName, increaseLevel, addBattleSkill);
+
+let newCharacter = levelUpToTen(currentCharacter);
+```
 
 ### 差异获取
 
