@@ -1,13 +1,13 @@
-var gulp = require('gulp');
-var clean = require('gulp-clean');
-var sourcemaps = require('gulp-sourcemaps');
-var uglify = require('gulp-uglify');
-var rename = require('gulp-rename');
-var rollup = require('rollup-stream');
-var source = require('vinyl-source-stream');
-var buffer = require('vinyl-buffer');
+let gulp = require('gulp');
+let clean = require('gulp-clean');
+let sourcemaps = require('gulp-sourcemaps');
+let uglify = require('gulp-uglify');
+let rename = require('gulp-rename');
+let rollup = require('rollup-stream');
+let source = require('vinyl-source-stream');
+let buffer = require('vinyl-buffer');
 
-var ROLLUP_CONFIG_INDEX = {
+let ROLLUP_CONFIG_INDEX = {
     entry: './src/index.js',
     sourceMap: true,
     format: 'umd',
@@ -18,7 +18,7 @@ var ROLLUP_CONFIG_INDEX = {
     ]
 };
 
-var ROLLUP_CONFIG_FP = {
+let ROLLUP_CONFIG_FP = {
     entry: './src/fp.js',
     sourceMap: true,
     format: 'umd',
@@ -29,14 +29,32 @@ var ROLLUP_CONFIG_FP = {
     ]
 };
 
-var UGLIFY_OPTIONS = {
+let ROLLUP_CONFIG_INDEX_MODULE = {
+    entry: './src/index.js',
+    format: 'es',
+    useStrict: false,
+    plugins: [
+        require('rollup-plugin-babel')()
+    ]
+};
+
+let ROLLUP_CONFIG_FP_MODULE = {
+    entry: './src/fp.js',
+    format: 'es',
+    useStrict: false,
+    plugins: [
+        require('rollup-plugin-babel')()
+    ]
+};
+
+let UGLIFY_OPTIONS = {
     mangle: true
 };
 
 gulp.task(
     'clean',
-    function () {
-        return gulp.src(['map', 'index.js', 'fp.js', '*.min.js'], {read: false})
+    () => {
+        return gulp.src(['map', 'index.js', 'fp.js', '*.min.js', '*.es.js'], {read: false})
             .pipe(clean());
     }
 );
@@ -44,7 +62,7 @@ gulp.task(
 gulp.task(
     'development.index',
     ['clean'],
-    function () {
+    () => {
         process.env.NODE_ENV = 'development';
 
         return rollup(ROLLUP_CONFIG_INDEX)
@@ -59,7 +77,7 @@ gulp.task(
 gulp.task(
     'production.index',
     ['development.index'],
-    function () {
+    () => {
         process.env.NODE_ENV = 'production';
 
         return rollup(ROLLUP_CONFIG_INDEX)
@@ -76,7 +94,7 @@ gulp.task(
 gulp.task(
     'development.fp',
     ['clean'],
-    function () {
+    () => {
         process.env.NODE_ENV = 'development';
 
         return rollup(ROLLUP_CONFIG_FP)
@@ -91,7 +109,7 @@ gulp.task(
 gulp.task(
     'production.fp',
     ['development.fp'],
-    function () {
+    () => {
         process.env.NODE_ENV = 'production';
 
         return rollup(ROLLUP_CONFIG_FP)
@@ -105,6 +123,35 @@ gulp.task(
     }
 );
 
-gulp.task('production', ['production.index', 'production.fp']);
+gulp.task(
+    'module.index',
+    ['clean'],
+    () => {
+        process.env.NODE_ENV = 'development';
 
-gulp.task('default', ['production']);
+        return rollup(ROLLUP_CONFIG_INDEX_MODULE)
+            .pipe(source('index.js', './src/*'))
+            .pipe(buffer())
+            .pipe(rename({suffix: '.es'}))
+            .pipe(gulp.dest('.'));
+    }
+);
+
+gulp.task(
+    'module.fp',
+    ['clean'],
+    () => {
+        process.env.NODE_ENV = 'development';
+
+        return rollup(ROLLUP_CONFIG_FP_MODULE)
+            .pipe(source('fp.js', './src/*'))
+            .pipe(buffer())
+            .pipe(rename({suffix: '.es'}))
+            .pipe(gulp.dest('.'));
+    }
+);
+
+gulp.task('production', ['production.index', 'production.fp']);
+gulp.task('module', ['module.index', 'module.fp']);
+
+gulp.task('default', ['production', 'module']);
