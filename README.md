@@ -974,7 +974,7 @@ open doc/api/index.html
 - 添加`$pop`、`$shift`、`$remove`、`$removeAt`指令
 - 允许使用诸如`"foo.bar[2]"`的字符串表达属性的访问路径
 - 为`macro`添加别名`builder`和`updateBuilder`
-- **[BREAKING]**移除`$slice`指令
+- **[BREAKING]** 移除`$slice`指令
 - **[BREAKING]**`$invoke`指令更名为`$apply`
 
 ### 1.4.0
