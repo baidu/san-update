@@ -339,14 +339,14 @@ update(source, {values: {$splice: [1, 1, 3, 4, 5]}});
 //     count: 1,
 //     values: [1, 3, 4, 5]
 // }
-splice(source, 'values', [1, 0, 3, 4, 5]);
+splice(source, 'values', 1, 0, 3, 4, 5);
 // {
 //     count: 1,
 //     values: [1, 3, 4, 5, 2]
 // }
 
 update(source, {count: {$splice: [1, 0, 2]}});
-splice(source, 'count', [1, 0, 2]);
+splice(source, 'count', 1, 0, 2);
 // Error: Usage of $splice command on non array object is forbidden.
 ```
 
