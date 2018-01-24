@@ -112,7 +112,7 @@ let newData = applyWith(
     data, // input
     'result', // path
     [o => o.values, o => o.multiple], // dependencies
-    (values, multiple, result) => values.reduce((sum, i) => sum + 1) * multiple + result
+    (values, multiple, result) => values.reduce((sum, i) => sum + i) * multiple + result
 );
 console.log(newData);
 // {
