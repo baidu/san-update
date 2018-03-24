@@ -17,7 +17,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ecomfe/san-update.git"
+    "url": "git+https://github.com/baidu/san-update.git"
   },
   "keywords": [
     "update",
@@ -27,9 +27,9 @@
   "author": "otakustay",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ecomfe/san-update/issues"
+    "url": "https://github.com/baidu/san-update/issues"
   },
-  "homepage": "https://github.com/ecomfe/san-update#readme",
+  "homepage": "https://github.com/baidu/san-update#readme",
   "nyc": {
     "include": [
       "src/*.js"
