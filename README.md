@@ -425,7 +425,7 @@ reduce(source, 'count', (sum, value) => sum + value);
 
 #### $merge
 
-用于在属性中合并相就的键值，`$merge`指令使用浅合并
+用于在属性中合并相同的键值，`$merge`指令使用浅合并
 
 ```javascript
 import {update, merge} from 'san-update';
@@ -558,11 +558,13 @@ let source = {
 };
 let time = dateOnly => {
     let now = new Date();
-    if (dateOnly) {
-        console.log(`    @${now.toLocaleDateString()}`);
-    }
-    else {
-        console.log(`    @${now.toLocaleString()}`);
+    return () => {
+        if (dateOnly) {
+            console.log(`    @${now.toLocaleDateString()}`);
+        }
+        else {
+            console.log(`    @${now.toLocaleString()}`);
+        }
     }
 };
 
@@ -570,7 +572,7 @@ let longTimeLogger = update(source, {log: {$composeAfter: time(false)}});
 longTimeLogger.log('Hello World');
 // Hello World
 //     @2017/3/17 下午4:35:14
-let shortTimeLogger = composeBefore(source, 'log', time(true));
+let shortTimeLogger = composeAfter(source, 'log', time(true));
 shortTimeLogger.log('Hello World');
 // Hello World
 //     @2017/3/17
