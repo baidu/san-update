@@ -296,6 +296,8 @@ describe('update method', () => {
         result.x.y.z = [1, 2, 3];
         expect(result).to.deep.equal(source);
         expect(diff).to.deep.equal(diffOfArray(['x', 'y', 'z'], [1, 2, 3], [1, 6, 7, 8, 3], 1, 1, [6, 7, 8]));
+        let [negativeStartRes] = withDiff(source, {x: {y: {z: {$splice: [-1, 1]}}}});
+        expect(negativeStartRes.x.y.z).to.deep.equal([1, 2]);
     });
 
     it('should throw running splice command on none array', () => {
