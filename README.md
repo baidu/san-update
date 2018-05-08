@@ -834,7 +834,7 @@ import {flow} from 'lodash'; // 使用lodash.flow组合多个函数
 let setRole = set('role', 'Skilled Warrior');
 let increaseLevel = apply('level', level => level + 1);
 let addBattleSkill = push('skills.battle', 'Bloody Massacre');
-let levelUpToTen = flow(setName, increaseLevel, addBattleSkill);
+let levelUpToTen = flow(setRole, increaseLevel, addBattleSkill);
 
 let newCharacter = levelUpToTen(currentCharacter);
 ```
