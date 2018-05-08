@@ -697,7 +697,7 @@ let levelUp = builder()
     .apply('level', level => level + 1)
     .apply('hp', hp => Math.round(hp * 1.19)) // 增加19%的HP
     .apply('str', str => str + 2)) // 增加2点力量
-    .apply('int', int => int + 1)) / 增加1点智力
+    .apply('int', int => int + 1)) // 增加1点智力
     .apply('agi', agi => agi + 5)) // 增加5点敏捷
     .apply('bag.capacity', capacity => capacity + 2) // 背包增加2格空间
     .set('debuff', []) // 清除所有负面状态
@@ -706,7 +706,7 @@ let levelUp = builder()
 let hero = game.getMyHero();
 console.log(hero);
 // {
-//     level: 1
+//     level: 1,
 //     hp: 100,
 //     str: 4,
 //     int: 2,
@@ -721,7 +721,7 @@ console.log(hero);
 hero = levelUp(hero);
 console.log(hero);
 // {
-//     level: 2
+//     level: 2,
 //     hp: 119,
 //     str: 6,
 //     int: 3,
@@ -736,7 +736,7 @@ console.log(hero);
 hero = levelUp(hero);
 console.log(hero);
 // {
-//     level: 3
+//     level: 3,
 //     hp: 142,
 //     str: 8,
 //     int: 4,
