@@ -136,7 +136,7 @@ export let availableCommands = {
     $splice(container, propertyName, [start, deleteCount, ...items]) {
         let array = container[propertyName];
         start = start < 0 ? array.length + start : start;
-        
+
         if (!Array.isArray(array)) {
             throw new Error('Usage of $splice command on non array object is forbidden.');
         }

@@ -1,6 +1,6 @@
 # san-update
-[![building status](https://img.shields.io/travis/ecomfe/san-update.svg?style=flat)](https://travis-ci.org/ecomfe/san-update)
-[![Coverage Status](https://img.shields.io/coveralls/ecomfe/san-update.svg?style=flat)](https://coveralls.io/github/ecomfe/san-update)
+[![building status](https://img.shields.io/travis/baidu/san-update.svg?style=flat)](https://travis-ci.org/baidu/san-update)
+[![Coverage Status](https://img.shields.io/coveralls/baidu/san-update.svg?style=flat)](https://coveralls.io/github/baidu/san-update)
 [![NPM version](https://img.shields.io/npm/v/san-update.svg?style=flat)](https://www.npmjs.com/package/san-update)
 
 
