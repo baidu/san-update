@@ -2,9 +2,13 @@
     "source": "./src",
     "destination": "./doc/api",
     "plugins": [
-        {"name": "esdoc-es7-plugin"}
-    ],
-    "manual": {
-        "overview": ["./README.md"]
-    }
+        {
+            "name": "esdoc-standard-plugin",
+            "option": {
+                "manual": {
+                    "files": ["./README.md"]
+                }
+            }
+        }
+    ]
 }

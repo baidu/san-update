@@ -6,10 +6,10 @@
  * @author otakustay
  */
 
-export let clone = target => {
-    let result = {};
+export const clone = target => {
+    const result = {};
     /* eslint-disable guard-for-in */
-    for (let key in target) {
+    for (const key in target) {
         result[key] = target[key];
     }
     /* eslint-enable guard-for-in */
@@ -17,23 +17,24 @@ export let clone = target => {
     return result;
 };
 
-export let find = (array, fn) => {
+export const find = (array, fn) => {
     for (let i = 0; i < array.length; i++) {
-        let item = array[i];
+        const item = array[i];
         if (fn(item)) {
             return item;
         }
     }
 
+    // eslint-disable-next-line consistent-return
     return undefined;
 };
 
-export let notEmpty = o => {
+export const notEmpty = o => {
     if (!o) {
         return false;
     }
 
-    for (let key in o) {
+    for (const key in o) {
         if (o.hasOwnProperty(key)) {
             return true;
         }
@@ -42,7 +43,7 @@ export let notEmpty = o => {
     return false;
 };
 
-export let indexOf = (array, o) => {
+export const indexOf = (array, o) => {
     for (let i = 0; i < array.length; i++) {
         if (array[i] === o) {
             return i;
@@ -52,15 +53,15 @@ export let indexOf = (array, o) => {
     return -1;
 };
 
-export let diffObject = (type, oldValue, newValue) => {
+export const diffObject = (type, oldValue, newValue) => {
     return {
         $change: type,
         oldValue: oldValue,
-        newValue: newValue
+        newValue: newValue,
     };
 };
 
-export let arrayDiffObject = (oldValue, newValue, spliceIndex, deleteCount, insertions) => {
+export const arrayDiffObject = (oldValue, newValue, spliceIndex, deleteCount, insertions) => {
     return {
         $change: 'change',
         oldValue: oldValue,
@@ -68,7 +69,7 @@ export let arrayDiffObject = (oldValue, newValue, spliceIndex, deleteCount, inse
         splice: {
             index: spliceIndex,
             deleteCount: deleteCount,
-            insertions: insertions
-        }
+            insertions: insertions,
+        },
     };
 };

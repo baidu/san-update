@@ -11,13 +11,13 @@ import macro from './macro';
 
 export {update, withDiff} from './update';
 export {
-    chain as chain,
-    chain as immutable
+    chain,
+    chain as immutable,
 };
 export {
-    macro as macro,
+    macro,
     macro as builder,
-    macro as updateBuilder
+    macro as updateBuilder,
 };
 export {
     set,
@@ -27,5 +27,5 @@ export {
     apply,
     omit,
     composeBefore, composeAfter,
-    applyWith
+    applyWith,
 } from './shortcut';

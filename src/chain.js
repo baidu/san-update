@@ -12,11 +12,12 @@ import {merge} from './shortcut';
 
 const EMPTY_COMMANDS = {};
 
-let createUpdater = (value, commands) => availableCommandNames.reduce(
+const createUpdater = (value, commands) => availableCommandNames.reduce(
     (updater, shortcut) => {
+        // eslint-disable-next-line no-param-reassign
         updater[shortcut] = (path, ...args) => {
-            let additionCommand = {['$' + shortcut]: args.length === 1 ? args[0] : args};
-            let newCommands = merge(commands, path, additionCommand);
+            const additionCommand = {['$' + shortcut]: args.length === 1 ? args[0] : args};
+            const newCommands = merge(commands, path, additionCommand);
             return createUpdater(value, newCommands);
         };
         return updater;
@@ -28,7 +29,7 @@ let createUpdater = (value, commands) => availableCommandNames.reduce(
 
         withDiff() {
             return withDiff(value, commands);
-        }
+        },
     }
 );
 

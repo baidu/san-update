@@ -8,7 +8,7 @@
 
 import * as shortcut from './shortcut';
 
-let wrap = fn => (...args) => source => fn(source, ...args);
+const wrap = fn => (...args) => source => fn(source, ...args);
 
 /**
  * 构建一个针对`$set`指令的更新函数
@@ -18,7 +18,7 @@ let wrap = fn => (...args) => source => fn(source, ...args);
  * @param {*} value 用于更新的值
  * @return {Function} 返回更新函数，该函数接收对象后依据指令进行更新并返回新对象
  */
-export let set = wrap(shortcut.set);
+export const set = wrap(shortcut.set);
 
 /**
  * 构建一个针对`$push`指令的更新函数
@@ -28,7 +28,7 @@ export let set = wrap(shortcut.set);
  * @param {*} value 用于更新的值
  * @return {Function} 返回更新函数，该函数接收对象后依据指令进行更新并返回新对象
  */
-export let push = wrap(shortcut.push);
+export const push = wrap(shortcut.push);
 
 /**
  * 构建一个针对`$unshift`指令的更新函数
@@ -38,7 +38,7 @@ export let push = wrap(shortcut.push);
  * @param {*} value 用于更新的值
  * @return {Function} 返回更新函数，该函数接收对象后依据指令进行更新并返回新对象
  */
-export let unshift = wrap(shortcut.unshift);
+export const unshift = wrap(shortcut.unshift);
 
 /**
  * 构建一个针对`$pop`指令的更新函数
@@ -48,7 +48,7 @@ export let unshift = wrap(shortcut.unshift);
  * @param {boolean|Function} assert 用于确认是否要移除属性的判断条件或函数
  * @return {Function} 返回更新函数，该函数接收对象后依据指令进行更新并返回新对象
  */
-export let pop = wrap(shortcut.pop);
+export const pop = wrap(shortcut.pop);
 
 /**
  * 构建一个针对`$shift`指令的更新函数
@@ -58,7 +58,7 @@ export let pop = wrap(shortcut.pop);
  * @param {boolean|Function} assert 用于确认是否要移除属性的判断条件或函数
  * @return {Function} 返回更新函数，该函数接收对象后依据指令进行更新并返回新对象
  */
-export let shift = wrap(shortcut.shift);
+export const shift = wrap(shortcut.shift);
 
 /**
  * 构建一个针对`$removeAt`指令的更新函数
@@ -68,7 +68,7 @@ export let shift = wrap(shortcut.shift);
  * @param {number} index 需要删除的索引
  * @return {Function} 返回更新函数，该函数接收对象后依据指令进行更新并返回新对象
  */
-export let removeAt = wrap(shortcut.removeAt);
+export const removeAt = wrap(shortcut.removeAt);
 
 /**
  * 构建一个针对`$remove`指令的更新函数
@@ -78,7 +78,7 @@ export let removeAt = wrap(shortcut.removeAt);
  * @param {*} value 需要删除的值
  * @return {Function} 返回更新函数，该函数接收对象后依据指令进行更新并返回新对象
  */
-export let remove = wrap(shortcut.remove);
+export const remove = wrap(shortcut.remove);
 
 /**
  * 构建一个针对`$splice`指令的更新函数
@@ -90,7 +90,7 @@ export let remove = wrap(shortcut.remove);
  * @param {...*} items 插入的元素
  * @return {Function} 返回更新函数，该函数接收对象后依据指令进行更新并返回新对象
  */
-export let splice = wrap(shortcut.splice);
+export const splice = wrap(shortcut.splice);
 
 /**
  * 构建一个针对`$map`指令的更新函数
@@ -100,7 +100,7 @@ export let splice = wrap(shortcut.splice);
  * @param {Function} callback 回调函数
  * @return {Function} 返回更新函数，该函数接收对象后依据指令进行更新并返回新对象
  */
-export let map = wrap(shortcut.map);
+export const map = wrap(shortcut.map);
 
 /**
  * 构建一个针对`$filter`指令的更新函数
@@ -110,7 +110,7 @@ export let map = wrap(shortcut.map);
  * @param {Function} callback 回调函数
  * @return {Function} 返回更新函数，该函数接收对象后依据指令进行更新并返回新对象
  */
-export let filter = wrap(shortcut.filter);
+export const filter = wrap(shortcut.filter);
 
 /**
  * 构建一个针对`$reduce`指令的更新函数
@@ -120,7 +120,7 @@ export let filter = wrap(shortcut.filter);
  * @param {...*} args 调用`reduce`时的参数，可以为`{Function} callback`或`{Function} callback, {*} initialValue`
  * @return {Function} 返回更新函数，该函数接收对象后依据指令进行更新并返回新对象
  */
-export let reduce = wrap(shortcut.reduce);
+export const reduce = wrap(shortcut.reduce);
 
 /**
  * 构建一个针对`$merge`指令的更新函数
@@ -130,7 +130,7 @@ export let reduce = wrap(shortcut.reduce);
  * @param {*} value 用于更新的值
  * @return {Function} 返回更新函数，该函数接收对象后依据指令进行更新并返回新对象
  */
-export let merge = wrap(shortcut.merge);
+export const merge = wrap(shortcut.merge);
 
 /**
  * 构建一个针对`$defaults`指令的更新函数
@@ -140,7 +140,7 @@ export let merge = wrap(shortcut.merge);
  * @param {*} value 用于更新的值
  * @return {Function} 返回更新函数，该函数接收对象后依据指令进行更新并返回新对象
  */
-export let defaults = wrap(shortcut.defaults);
+export const defaults = wrap(shortcut.defaults);
 
 /**
  * 构建一个针对`$apply`指令的更新函数
@@ -150,7 +150,7 @@ export let defaults = wrap(shortcut.defaults);
  * @param {Function} factory 用于生成新值的工厂函数
  * @return {Function} 返回更新函数，该函数接收对象后依据指令进行更新并返回新对象
  */
-export let apply = wrap(shortcut.apply);
+export const apply = wrap(shortcut.apply);
 
 /**
  * 构建一个针对`$omit`指令的更新函数
@@ -160,7 +160,7 @@ export let apply = wrap(shortcut.apply);
  * @param {boolean|Function} assert 用于确认是否要移除属性的判断条件或函数
  * @return {Function} 返回更新函数，该函数接收对象后依据指令进行更新并返回新对象
  */
-export let omit = wrap(shortcut.omit);
+export const omit = wrap(shortcut.omit);
 
 /**
  * 构建一个针对`$omit`指令的更新函数
@@ -170,7 +170,7 @@ export let omit = wrap(shortcut.omit);
  * @param {Function} before 包装函数，该函数会在原函数前执行，且返回值传递给原函数作为参数
  * @return {Function} 返回更新函数，该函数接收对象后依据指令进行更新并返回新对象
  */
-export let composeBefore = wrap(shortcut.composeBefore);
+export const composeBefore = wrap(shortcut.composeBefore);
 
 /**
  * 构建一个针对`$omit`指令的更新函数
@@ -180,7 +180,7 @@ export let composeBefore = wrap(shortcut.composeBefore);
  * @param {Function} after 包装函数，该函数会在原函数后执行，且接收原函数返回值作为参数
  * @return {Function} 返回更新函数，该函数接收对象后依据指令进行更新并返回新对象
  */
-export let composeAfter = wrap(shortcut.composeAfter);
+export const composeAfter = wrap(shortcut.composeAfter);
 
 /**
  * 构建一个针对`applyWith`快捷函数的更新对象
@@ -194,4 +194,4 @@ export let composeAfter = wrap(shortcut.composeAfter);
  * @param {Function} factory 用于生成新值的工厂函数，该函数前n个参数是`selectors`参数的返回值，最后一个参数为需要更新的属性的当前值
  * @return {Function} 返回更新函数，该函数接收对象后依据指令进行更新并返回新对象
  */
-export let applyWith = wrap(shortcut.applyWith);
+export const applyWith = wrap(shortcut.applyWith);

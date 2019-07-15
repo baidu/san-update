@@ -1,5 +1,4 @@
-import {expect} from 'chai';
-import {macro, builder, updateBuilder} from '../src/index';
+import {macro, builder, updateBuilder} from '../index';
 
 function createSourceObject() {
     return {
@@ -19,29 +18,29 @@ function createSourceObject() {
 
 describe('macro method', () => {
     it('should export alias', () => {
-        expect(macro === builder).to.equal(true);
-        expect(macro === updateBuilder).to.equal(true);
+        expect(macro === builder).toBe(true);
+        expect(macro === updateBuilder).toBe(true);
     });
 
     it('should export all update shortcuts', () => {
         let builder = macro();
-        expect(typeof builder.set).to.equal('function');
-        expect(typeof builder.merge).to.equal('function');
-        expect(typeof builder.push).to.equal('function');
-        expect(typeof builder.unshift).to.equal('function');
-        expect(typeof builder.pop).to.equal('function');
-        expect(typeof builder.shift).to.equal('function');
-        expect(typeof builder.removeAt).to.equal('function');
-        expect(typeof builder.remove).to.equal('function');
-        expect(typeof builder.splice).to.equal('function');
-        expect(typeof builder.map).to.equal('function');
-        expect(typeof builder.filter).to.equal('function');
-        expect(typeof builder.reduce).to.equal('function');
-        expect(typeof builder.defaults).to.equal('function');
-        expect(typeof builder.apply).to.equal('function');
-        expect(typeof builder.omit).to.equal('function');
-        expect(typeof builder.composeBefore).to.equal('function');
-        expect(typeof builder.composeAfter).to.equal('function');
+        expect(typeof builder.set).toBe('function');
+        expect(typeof builder.merge).toBe('function');
+        expect(typeof builder.push).toBe('function');
+        expect(typeof builder.unshift).toBe('function');
+        expect(typeof builder.pop).toBe('function');
+        expect(typeof builder.shift).toBe('function');
+        expect(typeof builder.removeAt).toBe('function');
+        expect(typeof builder.remove).toBe('function');
+        expect(typeof builder.splice).toBe('function');
+        expect(typeof builder.map).toBe('function');
+        expect(typeof builder.filter).toBe('function');
+        expect(typeof builder.reduce).toBe('function');
+        expect(typeof builder.defaults).toBe('function');
+        expect(typeof builder.apply).toBe('function');
+        expect(typeof builder.omit).toBe('function');
+        expect(typeof builder.composeBefore).toBe('function');
+        expect(typeof builder.composeAfter).toBe('function');
     });
 
     it('should correctly build an update function', () => {
@@ -59,7 +58,7 @@ describe('macro method', () => {
             bob: 3,
             tom: {jack: 1, tinna: 2}
         };
-        expect(target).to.deep.equal(base);
+        expect(target).toEqual(base);
     });
 
     it('should export a withDiff function attached on the update function', () => {
@@ -67,8 +66,8 @@ describe('macro method', () => {
             .apply('x', i => i + 1)
             .build();
         let [target, diff] = update.withDiff({x: 2});
-        expect(target).to.deep.equal({x: 3});
-        expect(diff).to.deep.equal({x: {$change: 'change', oldValue: 2, newValue: 3}});
+        expect(target).toEqual({x: 3});
+        expect(diff).toEqual({x: {$change: 'change', oldValue: 2, newValue: 3}});
     });
 
     it('should correctly build a withDiff function', () => {
@@ -76,8 +75,8 @@ describe('macro method', () => {
             .apply('x', i => i + 1)
             .buildWithDiff();
         let [target, diff] = withDiff({x: 2});
-        expect(target).to.deep.equal({x: 3});
-        expect(diff).to.deep.equal({x: {$change: 'change', oldValue: 2, newValue: 3}});
+        expect(target).toEqual({x: 3});
+        expect(diff).toEqual({x: {$change: 'change', oldValue: 2, newValue: 3}});
     });
 
     it('should fork an object for each method invocation', () => {
@@ -85,6 +84,6 @@ describe('macro method', () => {
         let updateFooAndBob = updateFoo.set('bob', 3);
         let source = createSourceObject();
         let target = updateFoo.build()(source);
-        expect(target.bob).to.equal(2);
+        expect(target.bob).toBe(2);
     });
 });

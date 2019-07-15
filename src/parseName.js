@@ -6,6 +6,7 @@
  * @author otakustay
  */
 
+/* eslint-disable max-depth */
 const LEFT_SQUARE_BRACKET = '['.charCodeAt(0);
 
 export default source => {
@@ -15,12 +16,12 @@ export default source => {
 
     // 这个简易的非状态机的实现是有缺陷的
     // 比如 a['dd.cc'].b 这种就有问题了，不过我们不考虑这种场景
-    let terms = (source + '').split('.');
-    let result = [];
+    const terms = (source + '').split('.');
+    const result = [];
 
     for (let i = 0; i < terms.length; i++) {
         let term = terms[i];
-        let propAccessorStart = term.indexOf('[');
+        const propAccessorStart = term.indexOf('[');
 
 
         if (propAccessorStart >= 0) {
@@ -30,18 +31,19 @@ export default source => {
             }
 
             while (term.charCodeAt(0) === LEFT_SQUARE_BRACKET) {
-                let propAccessorEnd = term.indexOf(']');
+                const propAccessorEnd = term.indexOf(']');
                 if (propAccessorEnd < 0) {
                     throw new Error('Property path syntax error: ' + source);
                 }
 
-                let propAccessorLiteral = term.slice(1, propAccessorEnd);
+                const propAccessorLiteral = term.slice(1, propAccessorEnd);
                 if (/^[0-9]+$/.test(propAccessorLiteral)) {
                     // for number
                     result.push(+propAccessorLiteral);
                 }
                 else if (/^(['"])([^\1]+)\1$/.test(propAccessorLiteral)) {
                     // for string literal
+                    // eslint-disable-next-line no-new-func
                     result.push((new Function('return ' + propAccessorLiteral))());
                 }
                 else {

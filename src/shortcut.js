@@ -9,17 +9,18 @@
 import {update} from './update';
 import parseName from './parseName';
 
-let buildPathObject = (propertyName, value) => {
+const buildPathObject = (propertyName, value) => {
     if (propertyName == null) {
         return value;
     }
 
-    let path = parseName(propertyName);
+    const path = parseName(propertyName);
 
-    let result = {};
+    const result = {};
     let current = result;
     for (let i = 0; i < path.length - 1; i++) {
-        current = current[path[i]] = {};
+        current[path[i]] = {};
+        current = current[path[i]];
     }
     current[path[path.length - 1]] = value;
     return result;
@@ -34,7 +35,7 @@ let buildPathObject = (propertyName, value) => {
  * @param {*} value 用于更新的值
  * @return {Object} 更新后的新对象
  */
-export let set = (source, path, value) => update(source, buildPathObject(path, {$set: value}));
+export const set = (source, path, value) => update(source, buildPathObject(path, {$set: value}));
 
 /**
  * 针对`$push`指令的快捷函数
@@ -45,7 +46,7 @@ export let set = (source, path, value) => update(source, buildPathObject(path, {
  * @param {*} value 用于更新的值
  * @return {Object} 更新后的新对象
  */
-export let push = (source, path, value) => update(source, buildPathObject(path, {$push: value}));
+export const push = (source, path, value) => update(source, buildPathObject(path, {$push: value}));
 
 /**
  * 针对`$unshift`指令的快捷函数
@@ -56,7 +57,7 @@ export let push = (source, path, value) => update(source, buildPathObject(path, 
  * @param {*} value 用于更新的值
  * @return {Object} 更新后的新对象
  */
-export let unshift = (source, path, value) => update(source, buildPathObject(path, {$unshift: value}));
+export const unshift = (source, path, value) => update(source, buildPathObject(path, {$unshift: value}));
 
 /**
  * 针对`$pop`指令的快捷函数
@@ -67,7 +68,7 @@ export let unshift = (source, path, value) => update(source, buildPathObject(pat
  * @param {boolean|Function} assert 用于确认是否要移除属性的判断条件或函数
  * @return {Object} 更新后的新对象
  */
-export let pop = (source, path, assert) => update(source, buildPathObject(path, {$pop: assert}));
+export const pop = (source, path, assert) => update(source, buildPathObject(path, {$pop: assert}));
 
 /**
  * 针对`$shift`指令的快捷函数
@@ -78,7 +79,7 @@ export let pop = (source, path, assert) => update(source, buildPathObject(path, 
  * @param {boolean|Function} assert 用于确认是否要移除属性的判断条件或函数
  * @return {Object} 更新后的新对象
  */
-export let shift = (source, path, assert) => update(source, buildPathObject(path, {$shift: assert}));
+export const shift = (source, path, assert) => update(source, buildPathObject(path, {$shift: assert}));
 
 /**
  * 针对`$removeAt`指令的快捷函数
@@ -89,7 +90,7 @@ export let shift = (source, path, assert) => update(source, buildPathObject(path
  * @param {number} index 需要删除的索引
  * @return {Object} 更新后的新对象
  */
-export let removeAt = (source, path, index) => update(source, buildPathObject(path, {$removeAt: index}));
+export const removeAt = (source, path, index) => update(source, buildPathObject(path, {$removeAt: index}));
 
 /**
  * 针对`$remove`指令的快捷函数
@@ -100,7 +101,7 @@ export let removeAt = (source, path, index) => update(source, buildPathObject(pa
  * @param {*} value 需要删除的值
  * @return {Object} 更新后的新对象
  */
-export let remove = (source, path, value) => update(source, buildPathObject(path, {$remove: value}));
+export const remove = (source, path, value) => update(source, buildPathObject(path, {$remove: value}));
 
 /**
  * 针对`$splice`指令的快捷函数
@@ -113,8 +114,8 @@ export let remove = (source, path, value) => update(source, buildPathObject(path
  * @param {...*} items 插入的元素
  * @return {Object} 更新后的新对象
  */
-export let splice = (source, path, start, deleteCount, ...items) => {
-    let args = [start, deleteCount, ...items];
+export const splice = (source, path, start, deleteCount, ...items) => {
+    const args = [start, deleteCount, ...items];
     return update(source, buildPathObject(path, {$splice: args}));
 };
 
@@ -127,7 +128,7 @@ export let splice = (source, path, start, deleteCount, ...items) => {
  * @param {Function} callback 回调函数
  * @return {Object} 更新后的新对象
  */
-export let map = (source, path, callback) => update(source, buildPathObject(path, {$map: callback}));
+export const map = (source, path, callback) => update(source, buildPathObject(path, {$map: callback}));
 
 /**
  * 针对`$filter`指令的快捷函数
@@ -138,7 +139,7 @@ export let map = (source, path, callback) => update(source, buildPathObject(path
  * @param {Function} callback 回调函数
  * @return {Object} 更新后的新对象
  */
-export let filter = (source, path, callback) => update(source, buildPathObject(path, {$filter: callback}));
+export const filter = (source, path, callback) => update(source, buildPathObject(path, {$filter: callback}));
 
 /**
  * 针对`$reduce`指令的快捷函数
@@ -149,8 +150,8 @@ export let filter = (source, path, callback) => update(source, buildPathObject(p
  * @param {...*} args 调用`reduce`时的参数，可以为`{Function} callback`或`{Function} callback, {*} initialValue`
  * @return {Object} 更新后的新对象
  */
-export let reduce = (source, path, ...args) => {
-    let command = args.length === 1 ? {$reduce: args[0]} : {$reduce: args};
+export const reduce = (source, path, ...args) => {
+    const command = args.length === 1 ? {$reduce: args[0]} : {$reduce: args};
     return update(source, buildPathObject(path, command));
 };
 
@@ -163,7 +164,7 @@ export let reduce = (source, path, ...args) => {
  * @param {*} value 用于更新的值
  * @return {Object} 更新后的新对象
  */
-export let merge = (source, path, value) => update(source, buildPathObject(path, {$merge: value}));
+export const merge = (source, path, value) => update(source, buildPathObject(path, {$merge: value}));
 
 /**
  * 针对`$defaults`指令的快捷函数
@@ -174,7 +175,7 @@ export let merge = (source, path, value) => update(source, buildPathObject(path,
  * @param {*} value 用于更新的值
  * @return {Object} 更新后的新对象
  */
-export let defaults = (source, path, value) => update(source, buildPathObject(path, {$defaults: value}));
+export const defaults = (source, path, value) => update(source, buildPathObject(path, {$defaults: value}));
 
 /**
  * 针对`$apply`指令的快捷函数
@@ -185,7 +186,7 @@ export let defaults = (source, path, value) => update(source, buildPathObject(pa
  * @param {Function} factory 用于生成新值的工厂函数
  * @return {Object} 更新后的新对象
  */
-export let apply = (source, path, factory) => update(source, buildPathObject(path, {$apply: factory}));
+export const apply = (source, path, factory) => update(source, buildPathObject(path, {$apply: factory}));
 
 /**
  * 针对`$omit`指令的快捷函数，其中`assert`参数默认值为`true`
@@ -196,7 +197,7 @@ export let apply = (source, path, factory) => update(source, buildPathObject(pat
  * @param {boolean|Function} assert 用于确认是否要移除属性的判断条件或函数
  * @return {Object} 更新后的新对象
  */
-export let omit = (source, path, assert = true) => update(source, buildPathObject(path, {$omit: assert}));
+export const omit = (source, path, assert = true) => update(source, buildPathObject(path, {$omit: assert}));
 
 /**
  * 针对`$omit`指令的快捷函数，其中`assert`参数默认值为`true`
@@ -207,7 +208,7 @@ export let omit = (source, path, assert = true) => update(source, buildPathObjec
  * @param {Function} before 包装函数，该函数会在原函数前执行，且返回值传递给原函数作为参数
  * @return {Object} 更新后的新对象
  */
-export let composeBefore = (source, path, before) => update(source, buildPathObject(path, {$composeBefore: before}));
+export const composeBefore = (source, path, before) => update(source, buildPathObject(path, {$composeBefore: before}));
 
 /**
  * 针对`$omit`指令的快捷函数，其中`assert`参数默认值为`true`
@@ -218,7 +219,7 @@ export let composeBefore = (source, path, before) => update(source, buildPathObj
  * @param {Function} after 包装函数，该函数会在原函数后执行，且接收原函数返回值作为参数
  * @return {Object} 更新后的新对象
  */
-export let composeAfter = (source, path, after) => update(source, buildPathObject(path, {$composeAfter: after}));
+export const composeAfter = (source, path, after) => update(source, buildPathObject(path, {$composeAfter: after}));
 
 /**
  * 支持通过依赖计算属性值的更新快捷函数
@@ -233,14 +234,14 @@ export let composeAfter = (source, path, after) => update(source, buildPathObjec
  * @param {Function} factory 用于生成新值的工厂函数，该函数前n个参数是`selectors`参数的返回值，最后一个参数为需要更新的属性的当前值
  * @return {Object} 更新后的新对象
  */
-export let applyWith = (source, path, selectors, factory) => {
+export const applyWith = (source, path, selectors, factory) => {
     if (Array.isArray(selectors)) {
-        let dependencies = selectors.map(select => select(source));
-        let boundFactory = value => factory(...dependencies, value);
+        const dependencies = selectors.map(select => select(source));
+        const boundFactory = value => factory(...dependencies, value);
         return apply(source, path, boundFactory);
     }
 
-    let dependency = selectors(source);
-    let boundFactory = value => factory(dependency, value);
+    const dependency = selectors(source);
+    const boundFactory = value => factory(dependency, value);
     return apply(source, path, boundFactory);
 };

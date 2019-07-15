@@ -4,16 +4,28 @@
   "description": "Scripts to immutably update object or array",
   "main": "index.min.js",
   "module": "index.es.js",
+  "files": [
+    "index.js",
+    "index.js.map",
+    "index.min.js",
+    "index.min.js.map",
+    "index.es.js",
+    "index.es.js.map",
+    "fp.js",
+    "fp.js.map",
+    "fp.min.js",
+    "fp.min.js.map",
+    "fp.es.js",
+    "fp.es.js.map",
+    "src"
+  ],
   "scripts": {
-    "test": "cross-env NODE_ENV=test mocha",
-    "test-cov": "npm run lint && cross-env NODE_ENV=test nyc --reporter=text --reporter=lcov --reporter=html mocha",
+    "lint": "skr lint src",
+    "test": "skr test --coverage",
     "report-cov": "cat coverage/lcov.info | coveralls",
-    "ci": "npm run test-cov && npm run compile",
-    "lint": "fecs",
+    "build": "node rollup.js",
     "doc": "esdoc -c esdoc.json",
-    "compile": "gulp",
-    "clean": "gulp clean",
-    "prepublish": "npm run compile"
+    "prepublishOnly": "yarn build"
   },
   "repository": {
     "type": "git",
@@ -30,42 +42,23 @@
     "url": "https://github.com/baidu/san-update/issues"
   },
   "homepage": "https://github.com/baidu/san-update#readme",
-  "nyc": {
-    "include": [
-      "src/*.js"
-    ],
-    "require": [
-      "babel-register"
-    ],
-    "sourceMap": false,
-    "instrument": false
-  },
   "devDependencies": {
-    "babel-cli": "^6.18.0",
-    "babel-core": "^6.21.0",
-    "babel-plugin-istanbul": "^3.0.0",
-    "babel-plugin-transform-es2015-modules-umd": "^6.18.0",
-    "babel-preset-es2015": "^6.18.0",
-    "babel-preset-es2015-rollup": "^3.0.0",
-    "babel-register": "^6.18.0",
-    "chai": "^3.5.0",
-    "coveralls": "^2.11.15",
-    "cross-env": "^3.1.3",
-    "esdoc": "^0.4.8",
-    "esdoc-es7-plugin": "0.0.3",
-    "fecs": "^1.1.0",
-    "gulp": "^3.9.1",
-    "gulp-clean": "^0.3.2",
-    "gulp-rename": "^1.2.2",
-    "gulp-sourcemaps": "2.2.0",
-    "gulp-uglify": "^2.0.0",
-    "mocha": "^3.2.0",
-    "nyc": "^10.0.0",
-    "rollup-plugin-babel": "^2.7.1",
-    "rollup-stream": "^1.14.0",
-    "type-detect": "^4.0.0",
-    "vinyl-buffer": "^1.0.0",
-    "vinyl-source-stream": "^1.1.0"
+    "@babel/core": "^7.0.0",
+    "@babel/preset-env": "^7.5.4",
+    "coveralls": "^3.0.5",
+    "esdoc": "^1.1.0",
+    "esdoc-standard-plugin": "^1.0.0",
+    "husky": "^3.0.0",
+    "reskript": "^0.18.4",
+    "rollup": "^1.17.0",
+    "rollup-plugin-babel": "^4.0.1",
+    "rollup-plugin-clear": "^2.0.7",
+    "rollup-plugin-terser": "^5.1.1"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "husky": {
+    "hooks": {
+      "pre-commit": "yarn test && yarn build"
+    }
+  }
 }

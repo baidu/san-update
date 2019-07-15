@@ -6,6 +6,7 @@
  * @author otakustay
  */
 
+/* eslint-disable max-statements, complexity */
 import {find, notEmpty} from './util';
 import {availableCommands, availableCommandKeys, OMIT_THIS_PROPERTY} from './command';
 
@@ -51,19 +52,19 @@ import {availableCommands, availableCommandKeys, OMIT_THIS_PROPERTY} from './com
  * @param {Object} commands 用于更新的指令
  * @return {[Object, Object]} 返回一个Tuple数组，其中第1项为更新结果，第2项为差异对象
  */
-export let withDiff = (source, commands) => {
+export const withDiff = (source, commands) => {
     // 如果根节点就是个指令，那么直接对输入的对象进行操作，不需要再遍历属性了
-    let possibleRootCommand = find(availableCommandKeys, key => commands.hasOwnProperty(key));
+    const possibleRootCommand = find(availableCommandKeys, key => commands.hasOwnProperty(key));
     if (possibleRootCommand) {
-        let wrapper = {source};
-        let commandValue = commands[possibleRootCommand];
+        const wrapper = {source};
+        const commandValue = commands[possibleRootCommand];
         return availableCommands[possibleRootCommand](wrapper, 'source', commandValue);
     }
 
     // ({string} key) => [newValue, diff]
-    let executeCommand = key => {
-        let propertyCommand = commands[key];
-        let availableCommand = find(availableCommandKeys, key => propertyCommand.hasOwnProperty(key));
+    const executeCommand = key => {
+        const propertyCommand = commands[key];
+        const availableCommand = find(availableCommandKeys, key => propertyCommand.hasOwnProperty(key));
 
         // 找到指令节点后，对当前属性进行更新，
         // 如果这个节点不代表指令，那么肯定它的某个属性（或子属性）是指令，继续递归往下找
@@ -73,17 +74,19 @@ export let withDiff = (source, commands) => {
     };
 
     // 因为可能通过指令增加一些原本没有的属性，所以最后还要对`commands`做一次遍历来确保没有漏掉
-    let patchNewProperties = (result, diff) => {
-        for (let key in commands) {
+    const patchNewProperties = (result, diff) => {
+        for (const key in commands) {
             if (result.hasOwnProperty(key) || !commands.hasOwnProperty(key)) {
                 continue;
             }
 
-            let [newValue, propertyDiff] = executeCommand(key);
+            const [newValue, propertyDiff] = executeCommand(key);
             // 理论上因为全是新属性，所以这里的`propertyDiff`不可能是空的
+            // eslint-disable-next-line no-param-reassign
             diff[key] = propertyDiff;
 
             if (newValue !== OMIT_THIS_PROPERTY) {
+                // eslint-disable-next-line no-param-reassign
                 result[key] = newValue;
             }
         }
@@ -92,8 +95,8 @@ export let withDiff = (source, commands) => {
     };
 
     if (Array.isArray(source)) {
-        let result = [];
-        let diff = {};
+        const result = [];
+        const diff = {};
         for (let i = 0; i < source.length; i++) {
             // 没有对应的指令，自然是不更新的，直接复制过去
             if (!commands.hasOwnProperty(i)) {
@@ -101,7 +104,7 @@ export let withDiff = (source, commands) => {
                 continue;
             }
 
-            let [newValue, propertyDiff] = executeCommand(i);
+            const [newValue, propertyDiff] = executeCommand(i);
             if (notEmpty(propertyDiff)) {
                 diff[i] = propertyDiff;
             }
@@ -113,16 +116,17 @@ export let withDiff = (source, commands) => {
         return patchNewProperties(result, diff);
     }
 
-    let result = {};
-    let diff = {};
-    for (let key in source) {
+    const result = {};
+    const diff = {};
+    // eslint-disable-next-line guard-for-in
+    for (const key in source) {
         // 没有对应的指令，自然是不更新的，直接复制过去
         if (!commands.hasOwnProperty(key)) {
             result[key] = source[key];
             continue;
         }
 
-        let [newValue, propertyDiff] = executeCommand(key);
+        const [newValue, propertyDiff] = executeCommand(key);
         if (notEmpty(propertyDiff)) {
             diff[key] = propertyDiff;
         }
@@ -156,4 +160,4 @@ export let withDiff = (source, commands) => {
  * @param {Object} commands 用于更新的指令
  * @return {Object} 更新后的对象
  */
-export let update = (source, commands) => withDiff(source, commands)[0];
+export const update = (source, commands) => withDiff(source, commands)[0];

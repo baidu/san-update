@@ -10,25 +10,26 @@ import {update, withDiff} from './update';
 import {availableCommandNames} from './command';
 import {merge} from './shortcut';
 
-let createMacro = commands => availableCommandNames.reduce(
+const createMacro = commands => availableCommandNames.reduce(
     (macro, shortcut) => {
+        // eslint-disable-next-line no-param-reassign
         macro[shortcut] = (path, ...args) => {
-            let additionCommand = {['$' + shortcut]: args.length === 1 ? args[0] : args};
-            let newCommands = merge(commands, path, additionCommand);
+            const additionCommand = {['$' + shortcut]: args.length === 1 ? args[0] : args};
+            const newCommands = merge(commands, path, additionCommand);
             return createMacro(newCommands);
         };
         return macro;
     },
     {
         build() {
-            let result = value => update(value, commands);
+            const result = value => update(value, commands);
             result.withDiff = value => withDiff(value, commands);
             return result;
         },
 
         buildWithDiff() {
             return value => withDiff(value, commands);
-        }
+        },
     }
 );
 
