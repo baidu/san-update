@@ -1,5 +1,5 @@
 const {rollup} = require('rollup');
-const babel = require('rollup-plugin-babel');
+const {default: babel} = require('@rollup/plugin-babel');
 const clear = require('rollup-plugin-clear');
 const {terser} = require('rollup-plugin-terser');
 
@@ -9,7 +9,7 @@ const run = (entry, minimize) => {
         input: entry,
         plugins: [
             clear(['map', 'index.js', 'fp.js', '*.min.js', '*.es.js']),
-            babel(),
+            babel({babelHelpers: 'bundled'}),
         ],
     };
 
