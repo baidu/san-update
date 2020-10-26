@@ -1,5 +1,5 @@
 # san-update
-[![building status](https://img.shields.io/travis/baidu/san-update.svg?style=flat)](https://travis-ci.org/baidu/san-update)
+[![building status](https://github.com/baidu/san-update/workflows/Node.js%20CI/badge.svg)](https://github.com/baidu/san-update/actions)
 [![Coverage Status](https://img.shields.io/coveralls/baidu/san-update.svg?style=flat)](https://coveralls.io/github/baidu/san-update)
 [![NPM version](https://img.shields.io/npm/v/san-update.svg?style=flat)](https://www.npmjs.com/package/san-update)
 
