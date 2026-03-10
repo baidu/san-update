@@ -4,6 +4,14 @@
   "description": "Scripts to immutably update object or array",
   "main": "index.min.js",
   "module": "index.es.js",
+  "types": "./types/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "fp": [
+        "./types/fp.d.ts"
+      ]
+    }
+  },
   "files": [
     "index.js",
     "index.js.map",
@@ -17,11 +25,14 @@
     "fp.min.js.map",
     "fp.es.js",
     "fp.es.js.map",
+    "types/index.d.ts",
+    "types/fp.d.ts",
     "src"
   ],
   "scripts": {
     "lint": "skr lint src",
     "test": "skr test --coverage",
+    "test:types": "tsd",
     "report-cov": "cat coverage/lcov.info | coveralls",
     "build": "node rollup.js",
     "doc": "esdoc -c esdoc.json",
@@ -50,18 +61,28 @@
     "@reskript/cli-test": "^0.9.6",
     "@reskript/config-lint": "^0.12.6",
     "@rollup/plugin-babel": "^5.2.1",
+    "@types/jest": "^30.0.0",
     "coveralls": "^3.1.0",
     "esdoc": "^1.1.0",
     "esdoc-standard-plugin": "^1.0.0",
     "husky": "^4.3.0",
     "rollup": "^2.32.1",
     "rollup-plugin-clear": "^2.0.7",
-    "rollup-plugin-terser": "^7.0.2"
+    "rollup-plugin-terser": "^7.0.2",
+    "ts-jest": "^29.4.6",
+    "tsd": "^0.31.0",
+    "typescript": "^5.9.3"
   },
-  "dependencies": {},
   "husky": {
     "hooks": {
-      "pre-commit": "yarn test && yarn build"
+      "pre-commit": "npm test && npm run test:types && npm run build"
+    }
+  },
+  "tsd": {
+    "directory": "types/__tests__",
+    "compilerOptions": {
+      "strict": true,
+      "noEmit": true
     }
   }
 }
