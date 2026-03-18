@@ -5,15 +5,9 @@
  * @file TypeScript type definitions
  */
 
-/**
- * Represents a property path that can be:
- * - A string (single level)
- * - A string array (multi-level)
- * - A number (array index)
- * - A number array (multi-dimensional indices)
- * - null or undefined (direct source update)
- */
-export type PropPath = string | string[] | number | number[] | null | undefined;
+import { PropPath } from './shared';
+
+export { PropPath };
 
 /**
  * Represents a change type in the diff object
@@ -21,18 +15,12 @@ export type PropPath = string | string[] | number | number[] | null | undefined;
 export type ChangeType = 'add' | 'remove' | 'change';
 
 /**
- * Represents a diff entry for a single property
+ * Represents a diff node for a single property or array operation
  */
-export interface DiffEntry {
+export interface DiffNode {
     $change: ChangeType;
     oldValue?: any;
     newValue?: any;
-}
-
-/**
- * Represents a diff entry for array operations
- */
-export interface ArrayDiffEntry extends DiffEntry {
     splice?: {
         index: number;
         deleteCount: number;
@@ -41,10 +29,10 @@ export interface ArrayDiffEntry extends DiffEntry {
 }
 
 /**
- * Recursive diff object structure
+ * Recursive diff tree structure
  */
-export type DiffObject = {
-    [key: string | number]: DiffEntry | ArrayDiffEntry | DiffObject;
+export type DiffTree = {
+    [key: string | number]: DiffNode | DiffTree;
 };
 
 // Command types
@@ -89,8 +77,11 @@ export interface FilterCommand {
 }
 
 export interface ReduceCommand<T> {
-    $reduce: ((acc: any, item: any, index: number, array: any[]) => T)
-        | [((acc: any, item: any, index: number, array: any[]) => T), any];
+    $reduce: (acc: any, item: any, index: number, array: any[]) => T;
+}
+
+export interface ReduceWithInitialCommand<T> {
+    $reduce: [(acc: any, item: any, index: number, array: any[]) => T, any];
 }
 
 export interface MergeCommand<T> {
@@ -132,6 +123,7 @@ export type Command =
     | MapCommand<any>
     | FilterCommand
     | ReduceCommand<any>
+    | ReduceWithInitialCommand<any>
     | MergeCommand<any>
     | DefaultsCommand<any>
     | ApplyCommand<any>
@@ -158,12 +150,12 @@ export function update<T = any>(source: T, commands: Commands | Command): T;
  * Update function that returns both the result and the diff
  * @param source The source object to update
  * @param commands The update commands
- * @returns A tuple containing [updatedObject, diffObject]
+ * @returns A tuple containing [updatedObject, diffTree]
  */
 export function withDiff<T = any>(
     source: T,
     commands: Commands | Command
-): [T, DiffObject];
+): [T, DiffTree];
 
 /**
  * Chain API interface - enables fluent method chaining for updates
@@ -222,14 +214,11 @@ export interface Chain<T> {
     /**
      * Reduce an array at the specified path
      */
+    reduce(path: PropPath, callback: (acc: any, item: any, index: number, array: any[]) => any): Chain<T>;
     reduce(
         path: PropPath,
-        ...args: [
-            callback: (acc: any, item: any, index: number, array: any[]) => any
-        ] | [
-            callback: (acc: any, item: any, index: number, array: any[]) => any,
-            initialValue: any
-        ]
+        callback: (acc: any, item: any, index: number, array: any[]) => any,
+        initialValue: any
     ): Chain<T>;
 
     /**
@@ -270,7 +259,7 @@ export interface Chain<T> {
     /**
      * Get both the updated value and the diff
      */
-    withDiff(): [T, DiffObject];
+    withDiff(): [T, DiffTree];
 }
 
 /**
@@ -342,14 +331,11 @@ export interface Builder {
     /**
      * Reduce an array at the specified path
      */
+    reduce(path: PropPath, callback: (acc: any, item: any, index: number, array: any[]) => any): Builder;
     reduce(
         path: PropPath,
-        ...args: [
-            callback: (acc: any, item: any, index: number, array: any[]) => any
-        ] | [
-            callback: (acc: any, item: any, index: number, array: any[]) => any,
-            initialValue: any
-        ]
+        callback: (acc: any, item: any, index: number, array: any[]) => any,
+        initialValue: any
     ): Builder;
 
     /**
@@ -389,10 +375,10 @@ export interface Builder {
     build(): <T = any>(source: T) => T;
 
     /**
-     * Build an update function that returns [updatedObject, diffObject]
-     * @returns A function that takes a source object and returns [updatedObject, diffObject]
+     * Build an update function that returns [updatedObject, diffTree]
+     * @returns A function that takes a source object and returns [updatedObject, diffTree]
      */
-    buildWithDiff(): <T = any>(source: T) => [T, DiffObject];
+    buildWithDiff(): <T = any>(source: T) => [T, DiffTree];
 }
 
 /**
@@ -486,12 +472,13 @@ export function filter<T = Object>(
 export function reduce<T = Object>(
     source: T,
     path: PropPath,
-    ...args: [
-        callback: (acc: any, item: any, index: number, array: any[]) => any
-    ] | [
-        callback: (acc: any, item: any, index: number, array: any[]) => any,
-        initialValue: any
-    ]
+    callback: (acc: any, item: any, index: number, array: any[]) => any
+): T;
+export function reduce<T = Object>(
+    source: T,
+    path: PropPath,
+    callback: (acc: any, item: any, index: number, array: any[]) => any,
+    initialValue: any
 ): T;
 
 /**

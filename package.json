@@ -27,6 +27,7 @@
     "fp.es.js.map",
     "types/index.d.ts",
     "types/fp.d.ts",
+    "types/shared.d.ts",
     "src"
   ],
   "scripts": {

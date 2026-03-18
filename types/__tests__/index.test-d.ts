@@ -36,7 +36,7 @@ import {
     Commands,
     Chain,
     Builder,
-    DiffObject,
+    DiffTree,
     SetCommand,
     PushCommand,
     MergeCommand,
@@ -133,7 +133,7 @@ expectType<TestState>(appliedUpdate);
 
 const [updatedState, diff] = withDiff(state, { name: { $set: 'new' } });
 expectType<TestState>(updatedState);
-expectType<DiffObject>(diff);
+expectType<DiffTree>(diff);
 
 // ============================================
 // Test chain API
@@ -192,7 +192,7 @@ const [chainValue, chainDiff] = chain(state)
     .set('name', 'new')
     .withDiff();
 expectType<TestState>(chainValue);
-expectType<DiffObject>(chainDiff);
+expectType<DiffTree>(chainDiff);
 
 // ============================================
 // Test macro API
@@ -213,7 +213,7 @@ const updateBuilderWithDiff = macro()
 
 const [macroValue, macroDiff] = updateBuilderWithDiff(state);
 expectType<TestState>(macroValue);
-expectType<DiffObject>(macroDiff);
+expectType<DiffTree>(macroDiff);
 
 // Builder with all operations
 const fullBuilder = macro()
@@ -257,7 +257,7 @@ const updateBuilderFnWithDiff = builder()
 
 const [builderValue, builderDiff] = updateBuilderFnWithDiff(state);
 expectType<TestState>(builderValue);
-expectType<DiffObject>(builderDiff);
+expectType<DiffTree>(builderDiff);
 
 // Builder with all operations
 const fullBuilderFn = builder()
