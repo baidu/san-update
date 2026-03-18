@@ -5,7 +5,7 @@
  * @file TypeScript type definitions for functional programming module
  */
 
-import { PropPath } from './index';
+import { PropPath } from './shared';
 
 /**
  * FP style update function - curried version of set
@@ -82,12 +82,12 @@ export function filter(
  */
 export function reduce(
     path: PropPath,
-    ...args: [
-        callback: (acc: any, item: any, index: number, array: any[]) => any
-    ] | [
-        callback: (acc: any, item: any, index: number, array: any[]) => any,
-        initialValue: any
-    ]
+    callback: (acc: any, item: any, index: number, array: any[]) => any
+): <T = Object>(source: T) => T;
+export function reduce(
+    path: PropPath,
+    callback: (acc: any, item: any, index: number, array: any[]) => any,
+    initialValue: any
 ): <T = Object>(source: T) => T;
 
 /**
