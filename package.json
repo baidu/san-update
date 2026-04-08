@@ -1,6 +1,6 @@
 {
   "name": "san-update",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Scripts to immutably update object or array",
   "main": "index.min.js",
   "module": "index.es.js",
